@@ -5,7 +5,9 @@ surveysim change log
 0.3.2 (unreleased)
 ------------------
 
-* No changes yet
+* Adds unit tests
+* removes data/tile-info.fits (not used here; was moved to desisurvey)
+* adds nightops.py (from desisurvey, used here but not there)
 
 0.3.1 (2016-12-21)
 ------------------
