@@ -9,7 +9,7 @@ import astropy.io.fits as pyfits
 from surveysim.weather import weatherModule
 from desisurvey.nightcal import getCalAll
 from desisurvey.afternoonplan import surveyPlan
-from desisurvey.nightops import obsCount, nightOps
+from surveysim.nightops import obsCount, nightOps
 
 def surveySim(sd0, ed0, seed=None, tilesubset=None, use_jpl=False):
     """
