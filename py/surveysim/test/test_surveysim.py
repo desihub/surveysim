@@ -37,22 +37,18 @@ class TestSurveySim(unittest.TestCase):
         self.assertTrue(os.path.exists('obslist_all.fits'))
         self.assertTrue(os.path.exists('tiles_observed.fits'))
         
-        ### This portion of the test will fail until desisurvey PR #27 is merged
-        ### https://github.com/desihub/desisurvey/pull/27
-        ### Comment out for now
-        
         #- Confirm that observations map to obslistYEARMMDD.fits files
-        # obs = Table.read('obslist_all.fits')
-        # nights = set()
-        # for dateobs in obs['DATE-OBS']:
-        #     #- convert DATE-OBS into NIGHT of sunset
-        #     localtime = Time(dateobs) - 7*units.hour   #- AZ = UTC-7
-        #     sunset_date = (localtime - 12*units.hour).to_datetime().strftime('%Y%m%d')
-        #     nights.add(sunset_date)
-        #
-        # for night in sorted(nights):
-        #     obsfile = 'obslist{}.fits'.format(night)
-        #     self.assertTrue(os.path.exists(obsfile), 'Missing {}'.format(obsfile))            
+        obs = Table.read('obslist_all.fits')
+        nights = set()
+        for dateobs in obs['DATE-OBS']:
+            #- convert DATE-OBS into NIGHT of sunset
+            localtime = Time(dateobs) - 7*units.hour   #- AZ = UTC-7
+            sunset_date = (localtime - 12*units.hour).to_datetime().strftime('%Y%m%d')
+            nights.add(sunset_date)
+
+        for night in sorted(nights):
+            obsfile = 'obslist{}.fits'.format(night)
+            self.assertTrue(os.path.exists(obsfile), 'Missing {}'.format(obsfile))
 
 if __name__ == '__main__':
     unittest.main()
