@@ -11,7 +11,7 @@ from desisurvey.nightcal import getCalAll
 from desisurvey.afternoonplan import surveyPlan
 from surveysim.nightops import obsCount, nightOps
 
-def surveySim(sd0, ed0, seed=None, tilesubset=None, use_jpl=False):
+def surveySim(sd0, ed0, seed=None, tilesubset=None, use_jpl=False, HA_assign=False):
     """
     Main driver for survey simulations.
 
@@ -35,10 +35,7 @@ def surveySim(sd0, ed0, seed=None, tilesubset=None, use_jpl=False):
     enddate = Time(datetime(*(ed0 + tz_offset)))
 
     # Tabulate sun and moon ephemerides for each night of the survey.
-    surveycal = getCalAll(startdate, enddate, use_cache=True)
-
-    # Build the survey plan.
-    sp = surveyPlan(startdate.mjd, enddate.mjd, surveycal, tilesubset=tilesubset)
+    #surveycal = getCalAll(startdate, enddate, use_cache=True)
 
     # Initialize the survey weather conditions generator.
     w = weatherModule(startdate.datetime, seed)
@@ -47,12 +44,19 @@ def surveySim(sd0, ed0, seed=None, tilesubset=None, use_jpl=False):
     if os.path.exists(tile_file):
         tilesObserved = Table.read(tile_file, format='fits')
         start_val = len(tilesObserved)+1
+        surveycal = getCalAll(startdate, enddate, use_cache=True)
+        enddate0 = enddate
     else:
         print("The survey will start from scratch.")
         tilesObserved = Table(names=('TILEID', 'STATUS'), dtype=('i8', 'i4'))
         tilesObserved.meta['MJDBEGIN'] = startdate.mjd
+        enddate0 = Time(datetime(*(ed0 + tz_offset))+timedelta(days=5.0*365.25))
+        tilesObserved.meta['MJDEND'] = enddate0.mjd
+        surveycal = getCalAll(startdate, enddate0, use_cache=False)
         start_val = 0
-
+        HA_assign = True
+    
+    sp = surveyPlan(startdate.mjd, enddate0.mjd, surveycal, tilesubset=tilesubset, HA_assign=HA_assign)
     ocnt = obsCount(start_val)
 
     # Define the summer monsoon season.
