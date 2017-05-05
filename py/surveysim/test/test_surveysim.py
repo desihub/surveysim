@@ -33,6 +33,7 @@ class TestSurveySim(unittest.TestCase):
         start = datetime.date(2019,9,1)
         stop = datetime.date(2019,9,8)
         sim = Simulator(start, stop, seed=123456, use_jpl=False)
+        sim.sp.config.set_output_path(self.testdir)
         while sim.next_day():
             pass
 
