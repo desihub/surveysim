@@ -149,8 +149,8 @@ def main(args):
 
         if args.save_restore and num_simulated > 0:
             # Restore the planner and scheduler saved after the previous night.
-            planner = desisurvey.plan.Planner(rules, restore='planner_{}.fits'.format(last_night))
-            scheduler = desisurvey.scheduler.Scheduler(restore='scheduler_{}.fits'.format(last_night))
+            planner = desisurvey.plan.Planner(rules, restore='desi-status_{}.fits'.format(last_night))
+            scheduler = desisurvey.scheduler.Scheduler(restore='desi-status_{}.fits'.format(last_night))
             scheduler.update_tiles(planner.tile_available, planner.tile_priority)
 
         # Perform afternoon planning.
@@ -166,8 +166,9 @@ def main(args):
 
         if args.save_restore:
             last_night = night.isoformat()
-            planner.save('planner_{}.fits'.format(last_night))
-            scheduler.save('scheduler_{}.fits'.format(last_night))
+            planner.set_donefrac(scheduler.tiles.tileID, scheduler.snr2frac,
+                                 scheduler.lastexpid)
+            planner.save('desi-status_{}.fits'.format(last_night))
 
         if num_simulated % args.log_interval == args.log_interval - 1:
             log.info('Completed {} / {} tiles after {} / {} nights.'.format(

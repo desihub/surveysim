@@ -30,6 +30,7 @@ class ExposureList(object):
     def __init__(self, restore=None, max_nexp=60000):
         self.tiles = desisurvey.tiles.get_tiles()
         self._exposures = np.empty(max_nexp, dtype=[
+            ('ID', np.float64),
             ('MJD', np.float64),
             ('EXPTIME', np.float32),
             ('TILEID', np.int32),
@@ -117,7 +118,8 @@ class ExposureList(object):
             raise RuntimeError(
                 'Need to increase max_nexp={}'.format(len(self._exposures)))
         self._exposures[self.nexp] = (
-            mjd, exptime, tileID, snr2frac, airmass, seeing, transp, sky)
+            self.nexp, mjd, exptime, tileID, snr2frac, airmass, seeing,
+            transp, sky)
         self.nexp += 1
         tileinfo = self._tiledata[self.tiles.index(tileID)]
         tileinfo['EXPTIME'] += exptime
