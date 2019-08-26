@@ -309,7 +309,7 @@ top-level simulation driver directly into your own script or jupyter notebook::
             night = start + datetime.timedelta(num_simulated)
 
             # Perform afternoon planning.
-            explist.update_tiles(night, *scheduler.update_tiles(*planner.afternoon_plan(night, scheduler.completed)))
+            explist.update_tiles(night, *scheduler.update_tiles(*planner.afternoon_plan(night, scheduler.completed, simulate=True)))
 
             if not desisurvey.utils.is_monsoon(night) and not scheduler.ephem.is_full_moon(night):
                 # Simulate one night of observing.
