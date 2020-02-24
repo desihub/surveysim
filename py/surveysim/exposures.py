@@ -30,7 +30,7 @@ class ExposureList(object):
     def __init__(self, restore=None, max_nexp=60000):
         self.tiles = desisurvey.tiles.get_tiles()
         self._exposures = np.empty(max_nexp, dtype=[
-            ('ID', np.float64),
+            ('EXPID', np.float64),
             ('MJD', np.float64),
             ('EXPTIME', np.float32),
             ('TILEID', np.int32),
