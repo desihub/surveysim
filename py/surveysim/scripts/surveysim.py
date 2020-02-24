@@ -161,14 +161,14 @@ def main(args):
             # Simulate one night of observing.
             surveysim.nightops.simulate_night(
                 night, scheduler, stats, explist, weather=weather, use_twilight=args.twilight)
+            planner.set_donefrac(scheduler.tiles.tileID, scheduler.snr2frac,
+                                 scheduler.lastexpid)
             if scheduler.survey_completed():
                 log.info('Survey complete on {}.'.format(night))
                 break
 
         if args.save_restore:
             last_night = desisurvey.utils.night_to_str(night)
-            planner.set_donefrac(scheduler.tiles.tileID, scheduler.snr2frac,
-                                 scheduler.lastexpid)
             planner.save('desi-status-{}.fits'.format(last_night))
 
         if num_simulated % args.log_interval == args.log_interval - 1:
