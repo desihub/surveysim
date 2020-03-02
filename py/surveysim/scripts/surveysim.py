@@ -76,6 +76,8 @@ def parse(options=None):
     parser.add_argument(
         '--config-file', default='config.yaml', metavar='CONFIG',
         help='input configuration file')
+    parser.add_argument('--brightsky', action='store_true',
+        help='use improved bright sky model (slower)')
 
     if options is None:
         args = parser.parse_args()
@@ -159,7 +161,8 @@ def main(args):
         if not desisurvey.utils.is_monsoon(night) and not scheduler.ephem.is_full_moon(night):
             # Simulate one night of observing.
             surveysim.nightops.simulate_night(
-                night, scheduler, stats, explist, weather=weather, use_twilight=args.twilight)
+                night, scheduler, stats, explist, weather=weather,
+                use_twilight=args.twilight, use_brightsky=args.brightsky)
             if scheduler.survey_completed():
                 log.info('Survey complete on {}.'.format(night))
                 break
