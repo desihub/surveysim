@@ -13,7 +13,7 @@ import desisurvey.plots
 
 def simulate_night(night, scheduler, stats, explist, weather,
                    use_twilight=False, update_interval=10.,
-                   plot=False, verbose=False):
+                   use_brightsky=False, plot=False, verbose=False): 
     """Simulate one night of observing.
 
     Uses the online tile scheduler and exposure time calculator.
@@ -34,6 +34,9 @@ def simulate_night(night, scheduler, stats, explist, weather,
         Observe during twilight when True.
     update_interval : float
         Interval in seconds for simulated ETC updates.
+    use_brightsky : bool 
+        If True use improved bright sky model in exposure time calculations
+        (ETC.start and ETC.update calls) 
     plot : bool
         Generate a plot summarizing the simulated night when True.
     verbose : bool
@@ -131,7 +134,8 @@ def simulate_night(night, scheduler, stats, explist, weather,
         seeing_now, transp_now = get_weather(mjd_now)
         # Get the next tile to observe from the scheduler.
         tileid, passnum, snr2frac_start, exposure_factor, airmass, sched_program, mjd_program_end = \
-            scheduler.next_tile(mjd_now, ETC, seeing_now, transp_now, sky_now)
+            scheduler.next_tile(mjd_now, ETC, seeing_now, transp_now, sky_now,
+                    use_brightsky=use_brightsky)
         if tileid is None:
             # Deadtime while we delay and try again.
             mjd_now += NO_TILE_AVAIL_DELAY
@@ -165,7 +169,10 @@ def simulate_night(night, scheduler, stats, explist, weather,
                     # -- NEXT EXPOSURE ---------------------------------------------------
                     # Get the current observing conditions.
                     seeing_now, transp_now = get_weather(mjd_now)
-                    sky_now = 1.
+                    if use_brightsky: 
+                        sky_now = exposure_factor  
+                    else: 
+                        sky_now = 1.
                     # Use the ETC to control the shutter.
                     mjd_open_shutter = mjd_now
                     ETC.start(mjd_now, tileid, tile_program, snr2frac_start, exposure_factor,
@@ -186,7 +193,10 @@ def simulate_night(night, scheduler, stats, explist, weather,
                             continue_this_tile = False
                         # Get the current observing conditions.
                         seeing_now, transp_now = get_weather(mjd_now)
-                        sky_now = 1.
+                        if use_brightsky: 
+                            sky_now = scheduler.update_exposure_factor(mjd_now, tileid)
+                        else: 
+                            sky_now = 1 
                         # Update the SNR.
                         if not ETC.update(mjd_now, seeing_now, transp_now, sky_now):
                             # Current exposure reached its target SNR according to the ETC.
