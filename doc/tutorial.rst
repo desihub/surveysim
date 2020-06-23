@@ -315,8 +315,8 @@ top-level simulation driver directly into your own script or jupyter notebook::
                 # Simulate one night of observing.
                 surveysim.nightops.simulate_night(
                     night, scheduler, stats, explist, weather=weather, use_twilight=use_twilight)
-		planner.set_donefrac(scheduler.tiles.tileID, scheduler.snr2frac,
-	                             scheduler.lastexpid)
+                planner.set_donefrac(scheduler.tiles.tileID, scheduler.snr2frac,
+                    scheduler.lastexpid)
 
                 if scheduler.survey_completed():
                     break
