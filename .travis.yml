@@ -51,15 +51,16 @@ env:
         # to repeat them for all configurations.
         # - NUMPY_VERSION=1.10
         # - SCIPY_VERSION=0.16
-        - ASTROPY_VERSION=2.0.4
-        - SPHINX_VERSION=1.5
-        - DESIUTIL_VERSION=1.9.9
+        - ASTROPY_VERSION=2.0.14
+        - SPHINX_VERSION=1.8.5
+        # - DESIUTIL_VERSION=2.0.1
+        - DESIUTIL_VERSION=master
         # - SPECLITE_VERSION=0.5
-        - SPECSIM_VERSION=v0.9
+        - SPECSIM_VERSION=v0.13
         # - SPECTER_VERSION=0.6.0
-        - DESIMODEL_VERSION=0.9.8
-        - DESIMODEL_DATA=branches/test-0.9.8
-        - DESISURVEY_VERSION=0.12.0
+        - DESIMODEL_VERSION=0.12.0
+        - DESIMODEL_DATA=branches/test-0.12
+        - DESISURVEY_VERSION=master
         # - HARP_VERSION=1.0.1
         # - SPECEX_VERSION=0.3.9
         - MAIN_CMD='python setup.py'
@@ -67,7 +68,7 @@ env:
         - CONDA_DEPENDENCIES=""
         # These packages will only be installed if we really need them.
         # - CONDA_ALL_DEPENDENCIES="scipy matplotlib healpy pyephem"
-        - CONDA_ALL_DEPENDENCIES="scipy pyyaml pytz healpy pyephem"
+        - CONDA_ALL_DEPENDENCIES="scipy matplotlib pyephem pytz"
         # These packages will always be installed.
         - PIP_DEPENDENCIES=""
         # These packages will only be installed if we really need them.
@@ -80,7 +81,6 @@ env:
         # Debug the Travis install process.
         - DEBUG=False
     matrix:
-        # - PYTHON_VERSION=2.7 SETUP_CMD='egg_info'
         - PYTHON_VERSION=3.5 SETUP_CMD='egg_info'
 
 matrix:
