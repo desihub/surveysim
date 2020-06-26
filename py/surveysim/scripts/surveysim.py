@@ -133,7 +133,7 @@ def main(args):
     rules = desisurvey.rules.Rules(args.rules)
     
     # Initialize afternoon planning.
-    planner = desisurvey.plan.Planner(rules)
+    planner = desisurvey.plan.Planner(rules, simulate=True)
 
     # Initialize next tile selection.
     scheduler = desisurvey.scheduler.Scheduler()
@@ -149,25 +149,27 @@ def main(args):
 
         if args.save_restore and num_simulated > 0:
             # Restore the planner and scheduler saved after the previous night.
-            planner = desisurvey.plan.Planner(rules, restore='planner_{}.fits'.format(last_night))
-            scheduler = desisurvey.scheduler.Scheduler(restore='scheduler_{}.fits'.format(last_night))
+            planner = desisurvey.plan.Planner(rules, restore='desi-status-{}.fits'.format(last_night),
+                                              simulate=True)
+            scheduler = desisurvey.scheduler.Scheduler(restore='desi-status-{}.fits'.format(last_night))
             scheduler.update_tiles(planner.tile_available, planner.tile_priority)
 
         # Perform afternoon planning.
-        explist.update_tiles(night, *scheduler.update_tiles(*planner.afternoon_plan(night, scheduler.completed)))
+        explist.update_tiles(night, *scheduler.update_tiles(*planner.afternoon_plan(night)))
 
         if not desisurvey.utils.is_monsoon(night) and not scheduler.ephem.is_full_moon(night):
             # Simulate one night of observing.
             surveysim.nightops.simulate_night(
                 night, scheduler, stats, explist, weather=weather, use_twilight=args.twilight)
+            planner.set_donefrac(scheduler.tiles.tileID, scheduler.snr2frac,
+                                 scheduler.lastexpid)
             if scheduler.survey_completed():
                 log.info('Survey complete on {}.'.format(night))
                 break
 
         if args.save_restore:
-            last_night = night.isoformat()
-            planner.save('planner_{}.fits'.format(last_night))
-            scheduler.save('scheduler_{}.fits'.format(last_night))
+            last_night = desisurvey.utils.night_to_str(night)
+            planner.save('desi-status-{}.fits'.format(last_night))
 
         if num_simulated % args.log_interval == args.log_interval - 1:
             log.info('Completed {} / {} tiles after {} / {} nights.'.format(

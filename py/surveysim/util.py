@@ -82,6 +82,7 @@ def add_calibration_exposures(exposures, flats_per_night=3, arcs_per_night=3,
     nout = nexp + ncalib
     output['EXPID'] = np.arange(nout, dtype=np.int32)
     template = astropy.table.Table(dtype=exposures.dtype)
+    template.remove_column('EXPID')
     for colname in template.colnames:
         col = template[colname]
         output[colname] = astropy.table.Column(dtype=col.dtype, length=nout)
