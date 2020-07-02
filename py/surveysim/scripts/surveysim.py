@@ -153,7 +153,7 @@ def main(args):
                                               simulate=True)
             scheduler = desisurvey.scheduler.Scheduler(planner)
 
-        # Perform afternoon planning.
+n        # Perform afternoon planning.
         explist.update_tiles(night, *planner.afternoon_plan(night))
 
         if not desisurvey.utils.is_monsoon(night) and not scheduler.ephem.is_full_moon(night):
@@ -170,7 +170,7 @@ def main(args):
 
         if num_simulated % args.log_interval == args.log_interval - 1:
             log.info('Completed {} / {} tiles after {} / {} nights.'.format(
-                scheduler.completed_by_pass.sum(), scheduler.tiles.ntiles,
+                scheduler.completed_by_program.sum(), scheduler.tiles.ntiles,
                 num_simulated + 1, num_nights))
 
     explist.save('exposures_{}.fits'.format(args.name), comment=args.comment)

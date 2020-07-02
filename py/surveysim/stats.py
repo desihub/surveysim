@@ -1,4 +1,4 @@
-"""Record simulated nightly statistics by pass.
+"""Record simulated nightly statistics by program.
 """
 from __future__ import print_function, division, absolute_import
 
@@ -15,7 +15,7 @@ import desisurvey.plots
 
 
 class SurveyStatistics(object):
-    """Collect nightly statistics by pass.
+    """Collect nightly statistics by program.
 
     Parameters
     ----------
@@ -54,9 +54,9 @@ class SurveyStatistics(object):
         for name in 'topen', 'tdead',:
             dtype.append((name, np.float, (nprograms,)))
         for name in 'tscience', 'tsetup', 'tsplit',:
-            dtype.append((name, np.float, (self.tiles.npasses,)))
+            dtype.append((name, np.float, (nprograms,)))
         for name in 'completed', 'nexp', 'nsetup', 'nsplit', 'nsetup_abort', 'nsplit_abort',:
-            dtype.append((name, np.int32, (self.tiles.npasses,)))
+            dtype.append((name, np.int32, (nprograms,)))
         self._data = np.zeros(self.num_nights, dtype)
         if restore is not None:
             # Restore array contents from a FITS file.
@@ -132,56 +132,48 @@ class SurveyStatistics(object):
             return False
         # Sum live time per program over nights.
         tlive = (D['topen'] - D['tdead']).sum(axis=1)
-        # Sum time spent in each state per pass over nights.
+        # Sum time spent in each state per program over nights.
         ttotal = (D['tsetup'] + D['tscience'] + D['tsplit']).sum(axis=1)
         return np.allclose(tlive, ttotal)
 
-    def summarize(self):
+    def summarize(self, nthday=None):
         """Print a tabular summary of the accumulated statistics to stdout.
         """
         assert self.validate()
         D = self._data
+        if nthday is None:
+            daysel = slice(None)
+        else:
+            daysel = D['MJD'] < np.min(D['MJD']) + nthday
+        D = D[daysel]
         tsched = 24 * D['tsched'].sum()
         topen = 24 * D['topen'].sum()
         tscience = 24 * D['tscience'].sum()
         print('Scheduled {:.3f} hr Open {:.3f}% Live {:.3f}%'.format(
             tsched, 100 * topen / max(1e-6, tsched), 100 * tscience / max(1e-6, topen)))
         print('=' * 82)
-        print('PROG PASS    TILES  NEXP SETUP ABT SPLIT ABT    TEXP TSETUP TSPLIT   TOPEN  TDEAD')
+        print('PROG         TILES  NEXP SETUP ABT SPLIT ABT    TEXP TSETUP TSPLIT   TOPEN  TDEAD')
         print('=' * 82)
-        # Summarize by pass.
-        for progidx, program in enumerate(self.tiles.programs):
+        # Summarize by program.
+        for program in self.tiles.programs:
+            progidx = self.tiles.program_index[program]
             ntiles_p, ndone_p, nexp_p, nsetup_p, nsplit_p, nsetup_abort_p, nsplit_abort_p = [0] * 7
             tscience_p, tsetup_p, tsplit_p = [0.] * 3
-            passes = []
             ntiles_all = 0
-            for passnum in list(self.tiles.program_passes[program]) + [' ']:
-                if passnum == ' ':
-                    sel = passes
-                    ntiles = ntiles_all
-                else:
-                    ntiles = self.tiles.pass_ntiles[passnum]
-                    ntiles_all += ntiles
-                    passidx = self.tiles.pass_index[passnum]
-                    sel = passidx
-                    passes.append(passidx)
-                ndone = D['completed'][:, sel].sum()
-                nexp = D['nexp'][:, sel].sum()
-                nsetup = D['nsetup'][:, sel].sum()
-                nsplit = D['nsplit'][:, sel].sum()
-                nsetup_abort = D['nsetup_abort'][:, sel].sum()
-                nsplit_abort = D['nsplit_abort'][:, sel].sum()
-                tscience = 86400 * D['tscience'][:, sel].sum() / max(1, ndone)
-                tsetup = 86400 * D['tsetup'][:, sel].sum() / max(1, ndone)
-                tsplit = 86400 * D['tsplit'][:, sel].sum() / max(1, ndone)
-                line = '{:6s} {} {:4d}/{:4d} {:5d} {:5d} {:3d} {:5d} {:3d} {:6.1f}s {:5.1f}s {:5.1f}s'.format(
-                    program, passnum, ndone, ntiles, nexp, nsetup, nsetup_abort, nsplit, nsplit_abort, tscience, tsetup, tsplit)
-                if passnum == ' ':
-                    # Open and deadtime are accumulated by program, not pass.
-                    topen = 86400 * D['topen'][:, progidx].sum() / max(1, ndone)
-                    tdead = 86400 * D['tdead'][:, progidx].sum() / max(1, ndone)
-                    line += ' {:6.1f}s {:5.1f}s\n{}'.format(topen, tdead, '-' * 82)
-                print(line)
+            sel = progidx
+            ntiles = np.sum(self.tiles.program_mask[program])
+            ndone = D['completed'][:, sel].sum()
+            nexp = D['nexp'][:, sel].sum()
+            nsetup = D['nsetup'][:, sel].sum()
+            nsplit = D['nsplit'][:, sel].sum()
+            nsetup_abort = D['nsetup_abort'][:, sel].sum()
+            nsplit_abort = D['nsplit_abort'][:, sel].sum()
+            tscience = 86400 * D['tscience'][:, sel].sum() / max(1, ndone)
+            tsetup = 86400 * D['tsetup'][:, sel].sum() / max(1, ndone)
+            tsplit = 86400 * D['tsplit'][:, sel].sum() / max(1, ndone)
+            line = '{:6s} {} {:4d}/{:4d} {:5d} {:5d} {:3d} {:5d} {:3d} {:6.1f}s {:5.1f}s {:5.1f}s'.format(
+                    program, ' ', ndone, ntiles, nexp, nsetup, nsetup_abort, nsplit, nsplit_abort, tscience, tsetup, tsplit)
+            print(line)
 
     def plot(self, forecast=None):
         """Plot a summary of the survey statistics.
@@ -192,39 +184,34 @@ class SurveyStatistics(object):
         assert self.validate()
         D = self._data
         nprograms = len(self.tiles.programs)
-        npasses = self.tiles.npasses
         # Find the last day of the survey.
         last = np.argmax(np.cumsum(D['completed'].sum(axis=1))) + 1
-        # Combine passes into programs.
         tsetup = np.zeros((last, nprograms))
         tsplit = np.zeros((last, nprograms))
         ntiles = np.zeros(nprograms, int)
-        for passnum in range(npasses):
-            progidx = self.tiles.program_index[self.tiles.pass_program[passnum]]
-            passidx = self.tiles.pass_index[passnum]
-            tsetup[:, progidx] += D['tsetup'][:last, passidx]
-            tsplit[:, progidx] += D['tsplit'][:last, passidx]
-            ntiles[progidx] += self.tiles.pass_ntiles[passnum]
+        for program in self.tiles.programs:
+            progidx = self.tiles.program_index[program]
+            tsetup[:, progidx] += D['tsetup'][:last, progidx]
+            tsplit[:, progidx] += D['tsplit'][:last, progidx]
+            ntiles[progidx] += np.sum(self.tiles.program_mask[program])
         actual = np.cumsum(D['completed'], axis=0)
 
         dt = 1 + np.arange(len(D))
         fig, axes = plt.subplots(2, 1, sharex=True, figsize=(12, 10))
 
         ax = axes[0]
-        npasses = D['completed'].shape[-1]
         for program in self.tiles.programs:
-            color = desisurvey.plots.program_color.get(program, 'purple')
-            for i, passnum in enumerate(self.tiles.program_passes[program]):
-                npass = self.tiles.pass_ntiles[passnum]
-                passidx = self.tiles.pass_index[passnum]
-                if forecast:
-                    ax.plot(dt, 100 * forecast.pass_progress[passidx] / npass, ':', c=color, lw=1)
-                ax.plot(dt[:last], 100 * actual[:last, passidx] / npass,
-                        lw=3, alpha=0.5, c=color, label=program if i == 0 else None)
+            programidx = self.tiles.program_index[program]
+            color = desisurvey.plots.program_color[program]
+            nprogram = np.sum(self.tiles.program_mask[program])
+            if forecast:
+                ax.plot(dt, 100 * forecast.program_progress[program] / nprogram, ':', c=color, lw=1)
+            ax.plot(dt[:last], 100 * actual[:last, programidx] / nprogram,
+                    lw=3, alpha=0.5, c=color, label=program)
         if forecast:
             ax.plot([], [], 'b:', lw=1, label='forecast')
         ax.legend(ncol=1)
-        ax.axvline(dt[last], ls='-', c='r')
+        ax.axvline(dt[last-1], ls='-', c='r')
         ax.set_ylim(0, 100)
         ax.set_ylabel('Completed [%]')
         yaxis = ax.yaxis
@@ -252,7 +239,7 @@ class SurveyStatistics(object):
         for program in self.tiles.programs:
             ax.plot([], [], '-', c=desisurvey.plots.program_color[program], label=program)
         ax.legend(ncol=2)
-        ax.axvline(dt[last], ls='-', c='r')
+        ax.axvline(dt[last-1], ls='-', c='r')
         ax.set_xlabel('Elapsed Days')
         ax.set_ylabel('Overhead / Tile [s]')
         ax.set_xlim(0, dt[-1] + 1)
