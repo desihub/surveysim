@@ -153,7 +153,7 @@ def main(args):
                                               simulate=True)
             scheduler = desisurvey.scheduler.Scheduler(planner)
 
-n        # Perform afternoon planning.
+        # Perform afternoon planning.
         explist.update_tiles(night, *planner.afternoon_plan(night))
 
         if not desisurvey.utils.is_monsoon(night) and not scheduler.ephem.is_full_moon(night):
