@@ -81,7 +81,7 @@ env:
         # Debug the Travis install process.
         - DEBUG=False
     matrix:
-        - PYTHON_VERSION=3.5 SETUP_CMD='egg_info'
+        - PYTHON_VERSION=3.6 SETUP_CMD='egg_info'
 
 matrix:
     # Don't wait for allowed failures.
@@ -103,11 +103,11 @@ matrix:
         # Do a bdist_egg compile.  This will catch things like syntax errors
         # without needing to do a full python setup.py test
         - os: linux
-          env: PYTHON_VERSION=3.5 SETUP_CMD='bdist_egg'
+          env: PYTHON_VERSION=3.6 SETUP_CMD='bdist_egg'
 
         # Default versions
         - os: linux
-          env: PYTHON_VERSION=3.5 SETUP_CMD='test --coverage'
+          env: PYTHON_VERSION=3.6 SETUP_CMD='test --coverage'
                CONDA_DEPENDENCIES=$CONDA_ALL_DEPENDENCIES
                PIP_DEPENDENCIES=$PIP_ALL_DEPENDENCIES
 
