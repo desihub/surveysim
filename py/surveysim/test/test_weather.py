@@ -17,11 +17,12 @@ class TestWeather(Tester):
         self.w = Weather(seed=123, replay='Y2015')
 
     def test_dome_open_prob(self):
-        """Dome should be (partially) open 26 nights in Dec 2019 when replaying Y2015"""
+        """31+28 nights in Jan and Feb, dome should be (partially) open
+        during 49 of them when replaying Y2015"""
         n_nights = self.w.num_nights
-        self.assertEqual(n_nights, 31)
+        self.assertEqual(n_nights, 31+28)
         open_nights = np.any(self.w._table['open'].reshape(n_nights, -1), axis=1).sum()
-        self.assertEqual(open_nights, 26)
+        self.assertEqual(open_nights, 49)
 
     def test_same_seed(self):
         """Weather should be identical with same seed"""
