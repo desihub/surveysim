@@ -68,7 +68,7 @@ env:
         - CONDA_DEPENDENCIES=""
         # These packages will only be installed if we really need them.
         # - CONDA_ALL_DEPENDENCIES="scipy matplotlib healpy pyephem"
-        - CONDA_ALL_DEPENDENCIES="scipy matplotlib pyephem pytz"
+        - CONDA_ALL_DEPENDENCIES="scipy matplotlib pyephem pytz pyyaml"
         # These packages will always be installed.
         - PIP_DEPENDENCIES=""
         # These packages will only be installed if we really need them.
