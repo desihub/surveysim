@@ -70,7 +70,7 @@ env:
         # - CONDA_ALL_DEPENDENCIES="scipy matplotlib healpy pyephem"
         - CONDA_ALL_DEPENDENCIES="scipy matplotlib pyephem pytz pyyaml"
         # These packages will always be installed.
-        - PIP_DEPENDENCIES=""
+        - PIP_DEPENDENCIES="specsim"
         # These packages will only be installed if we really need them.
         # - PIP_ALL_DEPENDENCIES="speclite==${SPECLITE_VERSION} coveralls"
         - PIP_ALL_DEPENDENCIES="coveralls"
