@@ -55,7 +55,7 @@ env:
         - SPHINX_VERSION=1.8.5
         # - DESIUTIL_VERSION=2.0.1
         - DESIUTIL_VERSION=master
-        # - SPECLITE_VERSION=0.5
+        - SPECLITE_VERSION=v0.8
         - SPECSIM_VERSION=v0.13
         # - SPECTER_VERSION=0.6.0
         - DESIMODEL_VERSION=0.12.0
@@ -70,7 +70,7 @@ env:
         # - CONDA_ALL_DEPENDENCIES="scipy matplotlib healpy pyephem"
         - CONDA_ALL_DEPENDENCIES="scipy matplotlib pyephem pytz pyyaml"
         # These packages will always be installed.
-        - PIP_DEPENDENCIES="specsim"
+        - PIP_DEPENDENCIES="speclite==${SPECLITE_VERSION} specsim"
         # These packages will only be installed if we really need them.
         # - PIP_ALL_DEPENDENCIES="speclite==${SPECLITE_VERSION} coveralls"
         - PIP_ALL_DEPENDENCIES="coveralls"
