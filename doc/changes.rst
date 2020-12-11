@@ -2,10 +2,19 @@
 surveysim change log
 ====================
 
-0.12.1 (unreleased)
+0.12.2 (unreleased)
 -------------------
 
 * No changes yet.
+
+0.12.1 (2020-12-11)
+-------------------
+
+* Drop py3.5 for travis testing (PR `#71`_).
+* fix test_weather to 2 months instead of one (commit 4d9ceb3).
+* fix EXPID int vs. str bug (commit 68c7088).
+
+.. _`#71`: https://github.com/desihub/surveysim/pull/71
 
 0.12.0 (2020-08-03)
 -------------------
