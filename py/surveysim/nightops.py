@@ -169,7 +169,7 @@ def simulate_night(night, scheduler, stats, explist, weather,
                     # -- NEXT EXPOSURE ---------------------------------------------------
                     # Get the current observing conditions.
                     seeing_now, transp_now = get_weather(mjd_now)
-                    if use_brightsky: 
+                    if use_brightsky and tile_program == 'BRIGHT': 
                         sky_now = exposure_factor  
                     else: 
                         sky_now = 1.
@@ -193,7 +193,7 @@ def simulate_night(night, scheduler, stats, explist, weather,
                             continue_this_tile = False
                         # Get the current observing conditions.
                         seeing_now, transp_now = get_weather(mjd_now)
-                        if use_brightsky: 
+                        if use_brightsky and tile_program == 'BRIGHT': 
                             sky_now = scheduler.update_exposure_factor(mjd_now, tileid)
                         else: 
                             sky_now = 1 

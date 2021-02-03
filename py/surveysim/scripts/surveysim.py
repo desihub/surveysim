@@ -78,6 +78,8 @@ def parse(options=None):
         help='input configuration file')
     parser.add_argument('--brightsky', action='store_true',
         help='use improved bright sky model (slower)')
+    parser.add_argument( '--bgs_footprint', type=str, default=None, 
+        help='reduce bgs footprint')
 
     if options is None:
         args = parser.parse_args()
@@ -127,20 +129,34 @@ def main(args):
     if args.tiles_file is not None:
         config.tiles_file.set_value(args.tiles_file)
 
+    if args.bgs_footprint is not None: 
+        bgs_footprint = float(args.bgs_footprint)
+    else: 
+        bgs_footprint = None 
+
+
     # Initialize simulation progress tracking.
-    stats = surveysim.stats.SurveyStatistics(args.start, args.stop)
-    explist = surveysim.exposures.ExposureList()
+    print('Initialize simulation progress tracking.')
+    stats = surveysim.stats.SurveyStatistics(args.start, args.stop,
+            bgs_footprint=bgs_footprint)
+    print('Exposure list.')
+    explist = surveysim.exposures.ExposureList(
+            bgs_footprint=bgs_footprint)
 
     # Initialize the survey strategy rules.
+    print('Initialize the survey strategy rules.')
     rules = desisurvey.rules.Rules(args.rules)
     
     # Initialize afternoon planning.
+    print('Initialize afternoon planning.') 
     planner = desisurvey.plan.Planner(rules)
 
     # Initialize next tile selection.
-    scheduler = desisurvey.scheduler.Scheduler()
+    print('Initialize next tile selection.') 
+    scheduler = desisurvey.scheduler.Scheduler(bgs_footprint=bgs_footprint)
 
     # Generate random weather conditions.
+    print('Generate random weather conditions.') 
     weather = surveysim.weather.Weather(seed=args.seed, replay=args.replay)
 
     # Loop over nights.

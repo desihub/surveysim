@@ -32,8 +32,12 @@ class SurveyStatistics(object):
         the configured output path unless an absolute path is
         provided.
     """
-    def __init__(self, start_date=None, stop_date=None, restore=None):
-        self.tiles = desisurvey.tiles.Tiles()
+    def __init__(self, start_date=None, stop_date=None, restore=None,
+            tiles_file=None, bgs_footprint=None):
+        if tiles_file is None: 
+            self.tiles = desisurvey.tiles.Tiles(bgs_footprint=bgs_footprint)
+        else: 
+            self.tiles = desisurvey.tiles.Tiles(tiles_file=tiles_file, bgs_footprint=bgs_footprint)
         config = desisurvey.config.Configuration()
         if start_date is None:
             self.start_date = config.first_day()
