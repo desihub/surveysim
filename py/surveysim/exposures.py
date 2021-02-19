@@ -38,6 +38,11 @@ class ExposureList(object):
             ('SEEING', np.float32),
             ('TRANSP', np.float32),
             ('SKY', np.float32),
+            ('MOON_ILL', np.float32),
+            ('MOON_SEP', np.float32),
+            ('MOON_ALT', np.float32),
+            ('SUN_SEP', np.float32),
+            ('SUN_ALT', np.float32)
         ])
         self._tiledata = np.empty(self.tiles.ntiles, dtype=[
             ('AVAIL', np.int32),
@@ -93,7 +98,8 @@ class ExposureList(object):
         self._tiledata['AVAIL'][available] = night_index
         self._tiledata['PLANNED'][planned] = night_index
 
-    def add(self, mjd, exptime, tileID, snr2frac, airmass, seeing, transp, sky):
+    def add(self, mjd, exptime, tileID, snr2frac, airmass, seeing, transp, sky,
+            moonill, moonsep, moonalt, sunsep, sunalt):
         """Record metadata for a single exposure.
 
         Parameters
@@ -117,7 +123,8 @@ class ExposureList(object):
             raise RuntimeError(
                 'Need to increase max_nexp={}'.format(len(self._exposures)))
         self._exposures[self.nexp] = (
-            mjd, exptime, tileID, snr2frac, airmass, seeing, transp, sky)
+            mjd, exptime, tileID, snr2frac, airmass, seeing, transp, sky,
+            moonill, moonsep, moonalt, sunsep, sunalt)
         self.nexp += 1
         tileinfo = self._tiledata[self.tiles.index(tileID)]
         tileinfo['EXPTIME'] += exptime

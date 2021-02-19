@@ -194,8 +194,9 @@ def simulate_night(night, scheduler, stats, explist, weather,
                         # Get the current observing conditions.
                         seeing_now, transp_now = get_weather(mjd_now)
                         if use_brightsky and tile_program == 'BRIGHT': 
-                            sky_now = scheduler.update_exposure_factor(mjd_now, tileid)
+                            sky_now, moon_ill, moon_sep, moon_alt, sun_sep, sun_alt = scheduler.update_exposure_factor(mjd_now, tileid, return_obs_cond=True)
                         else: 
+                            moon_ill, moon_sep, moon_alt, sun_sep, sun_alt = scheduler.get_observing_conditions(mjd_now, tileid)
                             sky_now = 1 
                         # Update the SNR.
                         if not ETC.update(mjd_now, seeing_now, transp_now, sky_now):
@@ -212,7 +213,8 @@ def simulate_night(night, scheduler, stats, explist, weather,
                     nightstats['nexp'][passnum] += 1
                     explist.add(
                         mjd_now - ETC.exptime, 86400 * ETC.exptime, tileid, ETC.snr2frac,
-                        airmass, seeing_now, transp_now, sky_now)
+                        airmass, seeing_now, transp_now, sky_now, moon_ill,
+                        moon_sep, moon_alt, sun_sep, sun_alt)
                     scheduler.update_snr(tileid, ETC.snr2frac)
 
                     if continue_this_tile:
