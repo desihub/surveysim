@@ -25,8 +25,8 @@ class TestUtil(Tester):
         tileID = tiles.tileID[0]
         # List some science exposures.
         exposures = surveysim.exposures.ExposureList()
-        exposures.add(58849., 1., tileID, 1., 1., 1.1, 0.9, 1.0)
-        exposures.add(58850., 1., tileID, 1., 1., 1.1, 0.9, 1.0)
+        exposures.add(58849., 1., tileID, 1., 1., 1., 1.1, 0.9, 1.0)
+        exposures.add(58850., 1., tileID, 1., 1., 1., 1.1, 0.9, 1.0)
         for mode in 'obj', 'recarray', 'table':
             if mode == 'obj':
                 input = exposures
@@ -46,8 +46,8 @@ class TestUtil(Tester):
 
         # List some out-of-order science exposures.
         bad_exposures = surveysim.exposures.ExposureList()
-        bad_exposures.add(58851., 1., tileID, 1., 1., 1.1, 0.9, 1.0)
-        bad_exposures.add(58850., 1., tileID, 1., 1., 1.1, 0.9, 1.0)
+        bad_exposures.add(58851., 1., tileID, 1., 1., 1., 1.1, 0.9, 1.0)
+        bad_exposures.add(58850., 1., tileID, 1., 1., 1., 1.1, 0.9, 1.0)
         with self.assertRaises(ValueError):
             output = add_calibration_exposures(bad_exposures)
 
