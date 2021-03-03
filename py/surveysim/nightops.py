@@ -201,7 +201,8 @@ def simulate_night(night, scheduler, stats, explist, weather,
                     nightstats['tscience'][passnum] += ETC.exptime
                     nightstats['nexp'][passnum] += 1
                     explist.add(
-                        mjd_now - ETC.exptime, 86400 * ETC.exptime, tileid, ETC.snr2frac,
+                        mjd_now - ETC.exptime, 86400 * ETC.exptime, tileid,
+                        ETC.snr2frac, ETC.snr2frac - snr2frac_start,
                         airmass, seeing_now, transp_now, sky_now)
                     scheduler.update_snr(tileid, ETC.snr2frac,
                                          explist.nexp)
