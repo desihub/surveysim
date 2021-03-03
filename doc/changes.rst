@@ -5,7 +5,8 @@ surveysim change log
 0.12.1 (unreleased)
 -------------------
 
-* No changes yet.
+* Use consistent conditions in scheduler.next_tile and in ETC.start
+  (PR `#75`_)
 
 0.12.0 (2020-08-03)
 -------------------
