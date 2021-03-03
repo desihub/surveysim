@@ -123,7 +123,7 @@ def simulate_night(night, scheduler, stats, explist, weather,
             dome_is_open = True
             weather_idx = idx_open
 
-        # == NEXT TILE ===========================================================        
+        # == NEXT TILE ===========================================================
         # Dome is open from mjd_now to next_dome_closing.
         mjd_last = mjd_now
         tdead = 0.
@@ -155,7 +155,7 @@ def simulate_night(night, scheduler, stats, explist, weather,
             # Charge this as setup time whether or not it was aborted.
             nightstats['tsetup'][passnum] += mjd_now - mjd_last
 
-            if dome_is_open:            
+            if dome_is_open:
                 # Lookup the program of the next tile, which might be
                 # different from the scheduled program in ``sched_program``.
                 tile_program = scheduler.tiles.pass_program[passnum]
@@ -201,7 +201,8 @@ def simulate_night(night, scheduler, stats, explist, weather,
                     nightstats['tscience'][passnum] += ETC.exptime
                     nightstats['nexp'][passnum] += 1
                     explist.add(
-                        mjd_now - ETC.exptime, 86400 * ETC.exptime, tileid, ETC.snr2frac,
+                        mjd_now - ETC.exptime, 86400 * ETC.exptime, tileid,
+                        ETC.snr2frac, ETC.snr2frac - snr2frac_start,
                         airmass, seeing_now, transp_now, sky_now)
                     scheduler.update_snr(tileid, ETC.snr2frac,
                                          explist.nexp)
