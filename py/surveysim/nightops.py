@@ -46,6 +46,7 @@ def simulate_night(night, scheduler, stats, explist, weather,
     label = str(night)
     # Lookup this night's sunset and sunrise MJD values.
     night_ephem = scheduler.ephem.get_night(night)
+    night_programs, night_changes = scheduler.ephem.get_night_program(night)
     if use_twilight:
         begin = night_ephem['brightdusk']
         end = night_ephem['brightdawn']
@@ -55,6 +56,8 @@ def simulate_night(night, scheduler, stats, explist, weather,
     nightstats['tsched'] = end - begin
     log.debug('Simulating observing on {} from MJD {:.5f} - {:.5f}.'
               .format(night, begin, end))
+
+    config = desisurvey.config.Configuration()
 
     # Find weather time steps that cover this night.
     weather_mjd = weather._table['mjd'].data
@@ -81,14 +84,24 @@ def simulate_night(night, scheduler, stats, explist, weather,
     # when mjd values are gradually increasing.
     weather_idx = 0
     dmjd_weather = weather_mjd[1] - weather_mjd[0]
+
     def get_weather(mjd):
-        nonlocal weather_idx
+        nonlocal weather_idx, night_changes, night_programs, config
         while mjd >= weather_mjd[weather_idx + 1]:
             weather_idx += 1
         s = (mjd - weather_mjd[weather_idx]) / dmjd_weather
+        cond_ind = np.interp(mjd, night_changes,
+                             np.arange(len(night_changes)))
+        if (cond_ind < 0) or (cond_ind >= len(night_programs)):
+            cond = 'BRIGHT'
+        else:
+            cond = night_programs[int(np.floor(cond_ind))]
+        sky = getattr(config.moon_up_factor, cond)()
+
         return (
             seeing[weather_idx] * (1 - s) + seeing[weather_idx + 1] * s,
-            transp[weather_idx] * (1 - s) + transp[weather_idx + 1] * s)
+            transp[weather_idx] * (1 - s) + transp[weather_idx + 1] * s,
+            sky)
 
     # Define time intervals to use in units of days (move to config?)
     NO_TILE_AVAIL_DELAY = 30. / 86400.
@@ -97,7 +110,6 @@ def simulate_night(night, scheduler, stats, explist, weather,
     dome_is_open = False
     mjd_now = weather_mjd[0]
     completed_last = scheduler.completed_by_pass.copy()
-    sky_now = 1.0  # placeholder
     while mjd_now < end:
         if not dome_is_open:
             # Advance to the next dome opening, if any.
@@ -128,10 +140,11 @@ def simulate_night(night, scheduler, stats, explist, weather,
         mjd_last = mjd_now
         tdead = 0.
         # Get the current observing conditions.
-        seeing_tile, transp_tile = get_weather(mjd_now)
+        seeing_tile, transp_tile, sky_tile = get_weather(mjd_now)
         # Get the next tile to observe from the scheduler.
         tileid, passnum, snr2frac_start, exposure_factor, airmass, sched_program, mjd_program_end = \
-            scheduler.next_tile(mjd_now, ETC, seeing_tile, transp_tile, sky_now)
+            scheduler.next_tile(mjd_now, ETC, seeing_tile, transp_tile,
+                                sky_tile)
         if tileid is None:
             # Deadtime while we delay and try again.
             mjd_now += NO_TILE_AVAIL_DELAY
@@ -163,13 +176,12 @@ def simulate_night(night, scheduler, stats, explist, weather,
                 continue_this_tile = True
                 while continue_this_tile:
                     # -- NEXT EXPOSURE ---------------------------------------------------
-                    # Get the current observing conditions.
-                    seeing_now, transp_now = get_weather(mjd_now)
-                    sky_now = 1.
                     # Use the ETC to control the shutter.
                     mjd_open_shutter = mjd_now
-                    ETC.start(mjd_now, tileid, tile_program, snr2frac_start, exposure_factor,
-                              seeing_tile, transp_tile, sky_now)
+                    seeing_now, transp_now, sky_now = get_weather(mjd_now)
+                    ETC.start(mjd_now, tileid, tile_program, snr2frac_start,
+                              exposure_factor,
+                              seeing_tile, transp_tile, sky_tile)
                     integrating = True
                     while integrating:
                         mjd_now += update_interval_days
@@ -185,12 +197,11 @@ def simulate_night(night, scheduler, stats, explist, weather,
                             integrating = False
                             continue_this_tile = False
                         # Get the current observing conditions.
-                        seeing_now, transp_now = get_weather(mjd_now)
-                        sky_now = 1.
+                        seeing_now, transp_now, sky_now = get_weather(mjd_now)
                         # Update the SNR.
                         if not ETC.update(mjd_now, seeing_now, transp_now, sky_now):
                             # Current exposure reached its target SNR according to the ETC.
-                            integrating= False
+                            integrating = False
                     # stop() will return False if this is a cosmic split and
                     # more integration is still required.
                     if ETC.stop(mjd_now):
