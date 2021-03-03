@@ -123,15 +123,15 @@ def simulate_night(night, scheduler, stats, explist, weather,
             dome_is_open = True
             weather_idx = idx_open
 
-        # == NEXT TILE ===========================================================        
+        # == NEXT TILE ===========================================================
         # Dome is open from mjd_now to next_dome_closing.
         mjd_last = mjd_now
         tdead = 0.
         # Get the current observing conditions.
-        seeing_now, transp_now = get_weather(mjd_now)
+        seeing_tile, transp_tile = get_weather(mjd_now)
         # Get the next tile to observe from the scheduler.
         tileid, passnum, snr2frac_start, exposure_factor, airmass, sched_program, mjd_program_end = \
-            scheduler.next_tile(mjd_now, ETC, seeing_now, transp_now, sky_now)
+            scheduler.next_tile(mjd_now, ETC, seeing_tile, transp_tile, sky_now)
         if tileid is None:
             # Deadtime while we delay and try again.
             mjd_now += NO_TILE_AVAIL_DELAY
@@ -155,7 +155,7 @@ def simulate_night(night, scheduler, stats, explist, weather,
             # Charge this as setup time whether or not it was aborted.
             nightstats['tsetup'][passnum] += mjd_now - mjd_last
 
-            if dome_is_open:            
+            if dome_is_open:
                 # Lookup the program of the next tile, which might be
                 # different from the scheduled program in ``sched_program``.
                 tile_program = scheduler.tiles.pass_program[passnum]
@@ -169,7 +169,7 @@ def simulate_night(night, scheduler, stats, explist, weather,
                     # Use the ETC to control the shutter.
                     mjd_open_shutter = mjd_now
                     ETC.start(mjd_now, tileid, tile_program, snr2frac_start, exposure_factor,
-                              seeing_now, transp_now, sky_now)
+                              seeing_tile, transp_tile, sky_now)
                     integrating = True
                     while integrating:
                         mjd_now += update_interval_days
@@ -201,7 +201,8 @@ def simulate_night(night, scheduler, stats, explist, weather,
                     nightstats['tscience'][passnum] += ETC.exptime
                     nightstats['nexp'][passnum] += 1
                     explist.add(
-                        mjd_now - ETC.exptime, 86400 * ETC.exptime, tileid, ETC.snr2frac,
+                        mjd_now - ETC.exptime, 86400 * ETC.exptime, tileid,
+                        ETC.snr2frac, ETC.snr2frac - snr2frac_start,
                         airmass, seeing_now, transp_now, sky_now)
                     scheduler.update_snr(tileid, ETC.snr2frac,
                                          explist.nexp)

@@ -22,7 +22,7 @@ class TestExposures(Tester):
         # Accumulate some exposures
         now = 0.
         for tileID in tiles.tileID[:100]:
-            exp.add(now, gen.uniform(), tileID, *gen.uniform(size=5))
+            exp.add(now, gen.uniform(), tileID, *gen.uniform(size=6))
         # Save and restore
         exp.save('exposures_test.fits', comment='unit test')
         exp2 = ExposureList(restore='exposures_test.fits')

@@ -5,7 +5,10 @@ surveysim change log
 0.12.2 (unreleased)
 -------------------
 
-* No changes yet.
+* Use consistent conditions in scheduler.next_tile and in ETC.start
+  (PR `#75`_)
+
+.. _`#75`: https://github.com/desihub/surveysim/pull/75
 
 0.12.1 (2020-12-11)
 -------------------
