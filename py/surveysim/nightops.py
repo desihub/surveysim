@@ -178,7 +178,6 @@ def simulate_night(night, scheduler, stats, explist, weather,
                     # -- NEXT EXPOSURE ---------------------------------------------------
                     # Use the ETC to control the shutter.
                     mjd_open_shutter = mjd_now
-                    seeing_now, transp_now, sky_now = get_weather(mjd_now)
                     ETC.start(mjd_now, tileid, tile_program, snr2frac_start,
                               exposure_factor,
                               seeing_tile, transp_tile, sky_tile)
