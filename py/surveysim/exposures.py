@@ -95,7 +95,8 @@ class ExposureList(object):
         self._tiledata['AVAIL'][available] = night_index
         self._tiledata['PLANNED'][planned] = night_index
 
-    def add(self, mjd, exptime, tileID, snr2frac, dsnr2frac, airmass, seeing, transp, sky):
+    def add(self, mjd, exptime, tileID, snr2frac, dsnr2frac,
+            airmass, seeing, transp, sky):
         """Record metadata for a single exposure.
 
         Parameters
