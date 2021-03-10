@@ -50,7 +50,7 @@ class SurveyStatistics(object):
         dtype = []
         for name in 'MJD', 'tsched',:
             dtype.append((name, np.float))
-        nprograms = len(self.tiles.PROGRAMS)
+        nprograms = len(self.tiles.programs)
         for name in 'topen', 'tdead',:
             dtype.append((name, np.float, (nprograms,)))
         for name in 'tscience', 'tsetup', 'tsplit',:
@@ -104,7 +104,7 @@ class SurveyStatistics(object):
         header['START'] = self.start_date.isoformat()
         header['STOP'] = self.stop_date.isoformat()
         header['COMMENT'] = comment
-        header['EXTNAME'] = 'STATS'    
+        header['EXTNAME'] = 'STATS'
         hdus.append(astropy.io.fits.PrimaryHDU())
         hdus.append(astropy.io.fits.BinTableHDU(self._data, header=header, name='STATS'))
         config = desisurvey.config.Configuration()
@@ -150,7 +150,7 @@ class SurveyStatistics(object):
         print('PROG PASS    TILES  NEXP SETUP ABT SPLIT ABT    TEXP TSETUP TSPLIT   TOPEN  TDEAD')
         print('=' * 82)
         # Summarize by pass.
-        for progidx, program in enumerate(self.tiles.PROGRAMS):
+        for progidx, program in enumerate(self.tiles.programs):
             ntiles_p, ndone_p, nexp_p, nsetup_p, nsplit_p, nsetup_abort_p, nsplit_abort_p = [0] * 7
             tscience_p, tsetup_p, tsplit_p = [0.] * 3
             passes = []
@@ -191,7 +191,7 @@ class SurveyStatistics(object):
         import matplotlib.pyplot as plt
         assert self.validate()
         D = self._data
-        nprograms = len(self.tiles.PROGRAMS)
+        nprograms = len(self.tiles.programs)
         npasses = self.tiles.npasses
         # Find the last day of the survey.
         last = np.argmax(np.cumsum(D['completed'].sum(axis=1))) + 1
@@ -200,7 +200,7 @@ class SurveyStatistics(object):
         tsplit = np.zeros((last, nprograms))
         ntiles = np.zeros(nprograms, int)
         for passnum in range(npasses):
-            progidx = self.tiles.PROGRAM_INDEX[self.tiles.pass_program[passnum]]
+            progidx = self.tiles.program_index[self.tiles.pass_program[passnum]]
             passidx = self.tiles.pass_index[passnum]
             tsetup[:, progidx] += D['tsetup'][:last, passidx]
             tsplit[:, progidx] += D['tsplit'][:last, passidx]
@@ -212,8 +212,8 @@ class SurveyStatistics(object):
 
         ax = axes[0]
         npasses = D['completed'].shape[-1]
-        for program in self.tiles.PROGRAMS:
-            color = desisurvey.plots.program_color[program]
+        for program in self.tiles.programs:
+            color = desisurvey.plots.program_color.get(program, 'purple')
             for i, passnum in enumerate(self.tiles.program_passes[program]):
                 npass = self.tiles.pass_ntiles[passnum]
                 passidx = self.tiles.pass_index[passnum]
@@ -233,8 +233,8 @@ class SurveyStatistics(object):
 
         ax = axes[1]
         # Plot overheads by program.
-        for progidx, program in enumerate(self.tiles.PROGRAMS):
-            c = desisurvey.plots.program_color[program]
+        for progidx, program in enumerate(self.tiles.programs):
+            c = desisurvey.plots.program_color.get(program, 'purple')
             scale = 86400 / ntiles[progidx] # secs / tile
             ax.plot(dt[:last], scale * np.cumsum(tsetup[:, progidx]), '-', c=c)
             ax.plot(dt[:last], scale * np.cumsum(tsplit[:, progidx]), '--', c=c)
@@ -248,7 +248,7 @@ class SurveyStatistics(object):
         ax.plot([], [], 'b-', label='setup')
         ax.plot([], [], 'b--', label='split')
         ax.plot([], [], 'b:', label='dead')
-        for program in self.tiles.PROGRAMS:
+        for program in self.tiles.programs:
             ax.plot([], [], '-', c=desisurvey.plots.program_color[program], label=program)
         ax.legend(ncol=2)
         ax.axvline(dt[last], ls='-', c='r')

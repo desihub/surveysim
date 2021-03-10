@@ -238,7 +238,10 @@ def simulate_night(night, scheduler, stats, explist, weather,
 
         # Update statistics for the scheduled program (which might be different from
         # the program of the tile we just observed).
-        pidx = scheduler.tiles.PROGRAM_INDEX[sched_program]
+        if scheduler.tiles.nogray:
+            sched_program = ('DARK' if sched_program == 'GRAY'
+                             else sched_program)
+        pidx = scheduler.tiles.program_index[sched_program]
         nightstats['tdead'][pidx] += tdead
         nightstats['topen'][pidx] += mjd_now - mjd_last
 
@@ -249,6 +252,7 @@ def simulate_night(night, scheduler, stats, explist, weather,
 
     # Save the number of tiles completed per pass in the nightly statistics.
     nightstats['completed'][:] = scheduler.completed_by_pass - completed_last
+    print(scheduler.completed_by_pass, np.sum(scheduler.completed), night)
 
     if plot:
         import matplotlib.pyplot as plt

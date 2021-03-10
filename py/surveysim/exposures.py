@@ -27,7 +27,7 @@ class ExposureList(object):
         The maximum expected number of exposures, which determines the
         memory size of this object.
     """
-    def __init__(self, restore=None, max_nexp=60000):
+    def __init__(self, restore=None, max_nexp=80000):
         self.tiles = desisurvey.tiles.get_tiles()
         self._exposures = np.empty(max_nexp, dtype=[
             ('EXPID', np.int32),
