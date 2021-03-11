@@ -25,7 +25,7 @@ class TestStats(Tester):
             night = self.start + datetime.timedelta(i)
             nightstats = stats.get_night(night)
             nightstats['tsched'] = gen.uniform()
-            for pidx in range(len(tiles.PROGRAMS)):
+            for pidx in range(len(tiles.programs)):
                 nightstats['topen'][pidx] = gen.uniform()
             for passnum in tiles.passes:
                 nightstats['tscience'][passnum] = gen.uniform()

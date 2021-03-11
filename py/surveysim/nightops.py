@@ -252,7 +252,6 @@ def simulate_night(night, scheduler, stats, explist, weather,
 
     # Save the number of tiles completed per pass in the nightly statistics.
     nightstats['completed'][:] = scheduler.completed_by_pass - completed_last
-    print(scheduler.completed_by_pass, np.sum(scheduler.completed), night)
 
     if plot:
         import matplotlib.pyplot as plt

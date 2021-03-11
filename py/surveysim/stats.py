@@ -233,7 +233,8 @@ class SurveyStatistics(object):
 
         ax = axes[1]
         # Plot overheads by program.
-        for progidx, program in enumerate(self.tiles.programs):
+        for program in self.tiles.programs:
+            progidx = self.tiles.program_index[program]
             c = desisurvey.plots.program_color.get(program, 'purple')
             scale = 86400 / ntiles[progidx] # secs / tile
             ax.plot(dt[:last], scale * np.cumsum(tsetup[:, progidx]), '-', c=c)
