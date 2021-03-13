@@ -145,10 +145,6 @@ def simulate_night(night, scheduler, stats, explist, weather,
         tileid, passnum, snr2frac_start, exposure_factor, airmass, sched_program, mjd_program_end = \
             scheduler.next_tile(mjd_now, ETC, seeing_tile, transp_tile,
                                 sky_tile)
-        if tileid is not None:
-            idx = scheduler.tiles.index(tileid)
-            programnum = (
-                scheduler.tiles.program_index[scheduler.tiles.tileprogram[idx]])
         if tileid is None:
             # Deadtime while we delay and try again.
             mjd_now += NO_TILE_AVAIL_DELAY
@@ -158,6 +154,9 @@ def simulate_night(night, scheduler, stats, explist, weather,
                 dome_is_open = False
             tdead += mjd_now - mjd_last
         else:
+            idx = scheduler.tiles.index(tileid)
+            tileprogram = scheduler.tiles.tileprogram[idx]
+            programnum = scheduler.tiles.program_index[tileprogram]
             # Setup for a new field.
             mjd_now += ETC.NEW_FIELD_SETUP
             if mjd_now >= next_dome_closing:
@@ -175,14 +174,13 @@ def simulate_night(night, scheduler, stats, explist, weather,
             if dome_is_open:
                 # Lookup the program of the next tile, which might be
                 # different from the scheduled program in ``sched_program``.
-                tile_program = program
                 # Loop over repeated exposures of the same tile.
                 continue_this_tile = True
                 while continue_this_tile:
                     # -- NEXT EXPOSURE ---------------------------------------------------
                     # Use the ETC to control the shutter.
                     mjd_open_shutter = mjd_now
-                    ETC.start(mjd_now, tileid, tile_program, snr2frac_start,
+                    ETC.start(mjd_now, tileid, tileprogram, snr2frac_start,
                               exposure_factor,
                               seeing_tile, transp_tile, sky_tile)
                     integrating = True
