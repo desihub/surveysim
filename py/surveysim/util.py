@@ -118,8 +118,7 @@ def add_calibration_exposures(exposures, flats_per_night=3, arcs_per_night=3,
         for colname in template.colnames:
             output[colname][outslice] = exposures[colname][sel]
         TILEIDs = exposures['TILEID'][sel]
-        output['PROGRAM'][outslice] = [
-            tiles.pass_program[p] for p in tiles.passnum[tiles.index(TILEIDs)]]
+        output['PROGRAM'][outslice] = tiles.tileprogram[tiles.index(TILEIDs)]
         output['NIGHT'][outslice] = NIGHT
         output['FLAVOR'][outslice] = 'science'
         out_idx += nsel

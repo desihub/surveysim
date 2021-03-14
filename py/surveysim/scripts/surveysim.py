@@ -175,5 +175,6 @@ def main(args):
 
     explist.save('exposures_{}.fits'.format(args.name), comment=args.comment)
     stats.save('stats_{}.fits'.format(args.name), comment=args.comment)
+    planner.save('desi-status-end.fits')
     if args.verbose:
         stats.summarize()
