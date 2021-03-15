@@ -55,7 +55,7 @@ def parse(options=None):
         '--comment', type=str, default='', metavar='COMMENT',
         help='comment to save with simulated stats and exposures')
     parser.add_argument(
-        '--rules', type=str, default='rules.yaml', metavar='YAML',
+        '--rules', type=str, default=None, metavar='YAML',
         help='name of YAML file with survey strategy rules to use')
     parser.add_argument('--twilight', action='store_true',
         help='include twilight in the scheduled time')
@@ -130,7 +130,12 @@ def main(args):
     explist = surveysim.exposures.ExposureList()
 
     # Initialize the survey strategy rules.
-    rules = desisurvey.rules.Rules(args.rules)
+    if args.rules is None:
+        rulesfile = config.rules_file()
+    else:
+        rulesfile = args.rules
+    rules = desisurvey.rules.Rules(rulesfile)
+    log.info('Rules loaded from {}.'.format(rulesfile))
 
     # Initialize afternoon planning.
     planner = desisurvey.plan.Planner(rules, simulate=True)
@@ -160,7 +165,7 @@ def main(args):
             # Simulate one night of observing.
             surveysim.nightops.simulate_night(
                 night, scheduler, stats, explist, weather=weather, use_twilight=args.twilight)
-            if scheduler.survey_completed():
+            if scheduler.plan.survey_completed():
                 log.info('Survey complete on {}.'.format(night))
                 break
 
@@ -170,11 +175,12 @@ def main(args):
 
         if num_simulated % args.log_interval == args.log_interval - 1:
             log.info('Completed {} / {} tiles after {} / {} nights.'.format(
-                scheduler.completed_by_program.sum(), scheduler.tiles.ntiles,
+                scheduler.plan.obsend().sum(),
+                scheduler.tiles.ntiles,
                 num_simulated + 1, num_nights))
 
     explist.save('exposures_{}.fits'.format(args.name), comment=args.comment)
     stats.save('stats_{}.fits'.format(args.name), comment=args.comment)
-    planner.save('desi-status-end.fits')
+    planner.save('desi-status-end-{}.fits'.format(args.name))
     if args.verbose:
         stats.summarize()
