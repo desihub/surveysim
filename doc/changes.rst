@@ -5,13 +5,17 @@ surveysim change log
 0.12.2 (unreleased)
 -------------------
 
+* Work in no-pass and no-gray modes, eliminating the notion of pass
+  and merging the dark and gray layers.  Update API to match associated
+  desisurvey changes.  (PR `#77`_)
 * Use variable sky in surveysim, albeit presently only from ephemerides.
-  (PR `#77`_)
+  (PR `#76`_)
 * Use consistent conditions in scheduler.next_tile and in ETC.start
   (PR `#75`_)
 
 .. _`#75`: https://github.com/desihub/surveysim/pull/75
-.. _`#77`: https://github.com/desihub/surveysim/pull/76
+.. _`#76`: https://github.com/desihub/surveysim/pull/76
+.. _`#77`: https://github.com/desihub/surveysim/pull/77
 
 0.12.1 (2020-12-11)
 -------------------
