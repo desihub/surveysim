@@ -154,7 +154,7 @@ def main(args):
 
         if args.save_restore and num_simulated > 0:
             # Restore the planner and scheduler saved after the previous night.
-            planner = desisurvey.plan.Planner(rules, restore='desi-status-{}.fits'.format(last_night),
+            planner = desisurvey.plan.Planner(rules, restore='desi-status-{}.ecsv'.format(last_night),
                                               simulate=True)
             scheduler = desisurvey.scheduler.Scheduler(planner)
 
@@ -171,7 +171,7 @@ def main(args):
 
         if args.save_restore:
             last_night = desisurvey.utils.night_to_str(night)
-            planner.save('desi-status-{}.fits'.format(last_night))
+            planner.save('desi-status-{}.ecsv'.format(last_night))
 
         if num_simulated % args.log_interval == args.log_interval - 1:
             log.info('Completed {} / {} tiles after {} / {} nights.'.format(
@@ -179,8 +179,8 @@ def main(args):
                 scheduler.tiles.ntiles,
                 num_simulated + 1, num_nights))
 
-    explist.save('exposures_{}.fits'.format(args.name), comment=args.comment)
-    stats.save('stats_{}.fits'.format(args.name), comment=args.comment)
-    planner.save('desi-status-end-{}.fits'.format(args.name))
+    explist.save('exposures_{}.ecsv'.format(args.name), comment=args.comment)
+    stats.save('stats_{}.ecsv'.format(args.name), comment=args.comment)
+    planner.save('desi-status-end-{}.ecsv'.format(args.name))
     if args.verbose:
         stats.summarize()
