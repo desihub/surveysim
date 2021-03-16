@@ -25,11 +25,12 @@ class TestStats(Tester):
             night = self.start + datetime.timedelta(i)
             nightstats = stats.get_night(night)
             nightstats['tsched'] = gen.uniform()
-            for pidx in range(len(tiles.PROGRAMS)):
+            for pidx in range(len(tiles.programs)):
                 nightstats['topen'][pidx] = gen.uniform()
-            for passnum in tiles.passes:
-                nightstats['tscience'][passnum] = gen.uniform()
-                nightstats['nexp'][passnum] = passnum
+            for program in tiles.programs:
+                progidx = tiles.program_index[program]
+                nightstats['tscience'][progidx] = gen.uniform()
+                nightstats['nexp'][progidx] = progidx
         # Save and restore
         stats.save('stats_test.fits', comment='unit test')
         stats2 = SurveyStatistics(restore='stats_test.fits')

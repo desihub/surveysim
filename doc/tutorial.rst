@@ -170,7 +170,7 @@ If you followed the installation recipe above then make sure you have activated 
 Configuration
 -------------
 
-Parameters for planning and scheduling the DESI survey are stored in a 
+Parameters for planning and scheduling the DESI survey are stored in a
 `configuration file
 <https://github.com/desihub/desisurvey/blob/master/py/desisurvey/data/config.yaml>`__
 which is well commented and provides a good overview of the assumptions being made.
@@ -296,29 +296,28 @@ top-level simulation driver directly into your own script or jupyter notebook::
         # Initialize simulation progress tracking.
         stats = surveysim.stats.SurveyStatistics()
         explist = surveysim.exposures.ExposureList()
-        
+
         # Initialize afternoon planning.
         planner = desisurvey.plan.Planner(rules, simulate=True)
 
         # Initialize next tile selection.
         scheduler = desisurvey.scheduler.Scheduler()
-        
+
         # Loop over nights.
         num_simulated = 0
         for num_simulated in range(num_nights):
             night = start + datetime.timedelta(num_simulated)
 
             # Perform afternoon planning.
-            explist.update_tiles(night, *scheduler.update_tiles(*planner.afternoon_plan(night)))
+            explist.update_tiles(night, *planner.afternoon_plan(night))
 
             if not desisurvey.utils.is_monsoon(night) and not scheduler.ephem.is_full_moon(night):
                 # Simulate one night of observing.
                 surveysim.nightops.simulate_night(
                     night, scheduler, stats, explist, weather=weather, use_twilight=use_twilight)
-                planner.set_donefrac(scheduler.tiles.tileID, scheduler.snr2frac,
-                    scheduler.lastexpid)
+                planner.set_donefrac(scheduler.tiles.tileID, scheduler.snr2frac)
 
-                if scheduler.survey_completed():
+                if scheduler.plan.survey_completed():
                     break
 
         return stats, explist

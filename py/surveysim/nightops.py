@@ -109,7 +109,7 @@ def simulate_night(night, scheduler, stats, explist, weather,
     # Step through the night.
     dome_is_open = False
     mjd_now = weather_mjd[0]
-    completed_last = scheduler.completed_by_pass.copy()
+    completed_last = scheduler.plan.obsend_by_program()
     while mjd_now < end:
         if not dome_is_open:
             # Advance to the next dome opening, if any.
@@ -154,6 +154,9 @@ def simulate_night(night, scheduler, stats, explist, weather,
                 dome_is_open = False
             tdead += mjd_now - mjd_last
         else:
+            idx = scheduler.tiles.index(tileid)
+            tileprogram = scheduler.tiles.tileprogram[idx]
+            programnum = scheduler.tiles.program_index[tileprogram]
             # Setup for a new field.
             mjd_now += ETC.NEW_FIELD_SETUP
             if mjd_now >= next_dome_closing:
@@ -161,24 +164,23 @@ def simulate_night(night, scheduler, stats, explist, weather,
                 mjd_now = next_dome_closing
                 dome_is_open = False
                 # Record an aborted setup.
-                nightstats['nsetup_abort'][passnum] += 1
+                nightstats['nsetup_abort'][programnum] += 1
             else:
                 # Record a completed setup.
-                nightstats['nsetup'][passnum] += 1
+                nightstats['nsetup'][programnum] += 1
             # Charge this as setup time whether or not it was aborted.
-            nightstats['tsetup'][passnum] += mjd_now - mjd_last
+            nightstats['tsetup'][programnum] += mjd_now - mjd_last
 
             if dome_is_open:
                 # Lookup the program of the next tile, which might be
                 # different from the scheduled program in ``sched_program``.
-                tile_program = scheduler.tiles.pass_program[passnum]
                 # Loop over repeated exposures of the same tile.
                 continue_this_tile = True
                 while continue_this_tile:
                     # -- NEXT EXPOSURE ---------------------------------------------------
                     # Use the ETC to control the shutter.
                     mjd_open_shutter = mjd_now
-                    ETC.start(mjd_now, tileid, tile_program, snr2frac_start,
+                    ETC.start(mjd_now, tileid, tileprogram, snr2frac_start,
                               exposure_factor,
                               seeing_tile, transp_tile, sky_tile)
                     integrating = True
@@ -208,14 +210,13 @@ def simulate_night(night, scheduler, stats, explist, weather,
 
                     # Record this exposure
                     assert np.allclose(ETC.exptime, mjd_now - mjd_open_shutter)
-                    nightstats['tscience'][passnum] += ETC.exptime
-                    nightstats['nexp'][passnum] += 1
+                    nightstats['tscience'][programnum] += ETC.exptime
+                    nightstats['nexp'][programnum] += 1
                     explist.add(
                         mjd_now - ETC.exptime, 86400 * ETC.exptime, tileid,
                         ETC.snr2frac, ETC.snr2frac - snr2frac_start,
                         airmass, seeing_now, transp_now, sky_now)
-                    scheduler.update_snr(tileid, ETC.snr2frac,
-                                         explist.nexp)
+                    scheduler.update_snr(tileid, ETC.snr2frac)
 
                     if continue_this_tile:
                         # Prepare for the next exposure of the same tile.
@@ -228,27 +229,31 @@ def simulate_night(night, scheduler, stats, explist, weather,
                             dome_is_open = False
                             continue_this_tile = False
                             # Record an aborted split.
-                            nightstats['nsplit_abort'][passnum] += 1
+                            nightstats['nsplit_abort'][programnum] += 1
                         else:
                             # Record a completed split.
-                            nightstats['nsplit'][passnum] += 1
+                            nightstats['nsplit'][programnum] += 1
                         # Charge this as split time, whether or not is was aborted.
-                        nightstats['tsplit'][passnum] += mjd_now - mjd_split_start
+                        nightstats['tsplit'][programnum] += mjd_now - mjd_split_start
                     # --------------------------------------------------------------------
 
         # Update statistics for the scheduled program (which might be different from
         # the program of the tile we just observed).
-        pidx = scheduler.tiles.PROGRAM_INDEX[sched_program]
+        if scheduler.tiles.nogray:
+            sched_program = ('DARK' if sched_program == 'GRAY'
+                             else sched_program)
+        pidx = scheduler.tiles.program_index[sched_program]
         nightstats['tdead'][pidx] += tdead
         nightstats['topen'][pidx] += mjd_now - mjd_last
 
         # All done if we have observed all tiles.
-        if scheduler.survey_completed():
+        if scheduler.plan.survey_completed():
             break
         # ========================================================================
 
-    # Save the number of tiles completed per pass in the nightly statistics.
-    nightstats['completed'][:] = scheduler.completed_by_pass - completed_last
+    # Save the number of tiles completed per program in the nightly statistics.
+    nightstats['completed'][:] = (
+        scheduler.plan.obsend_by_program() - completed_last)
 
     if plot:
         import matplotlib.pyplot as plt
@@ -268,8 +273,7 @@ def simulate_night(night, scheduler, stats, explist, weather,
         mjd_history = np.array(ETC.history['mjd'])
         snr2frac_history = np.array(ETC.history['snr2frac'])
         for expinfo in explist._exposures[nexp_last: explist.nexp]:
-            passnum = scheduler.tiles.passnum[scheduler.tiles.index(expinfo['TILEID'])]
-            program = scheduler.tiles.pass_program[passnum]
+            program = scheduler.tiles.tileprogram[scheduler.tiles.index(expinfo['TILEID'])]
             color = desisurvey.plots.program_color[program]
             t1 = expinfo['MJD']
             t2 = t1 + expinfo['EXPTIME'] / 86400
