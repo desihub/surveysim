@@ -179,8 +179,8 @@ def main(args):
                 scheduler.tiles.ntiles,
                 num_simulated + 1, num_nights))
 
-    explist.save('exposures_{}.ecsv'.format(args.name), comment=args.comment)
-    stats.save('stats_{}.ecsv'.format(args.name), comment=args.comment)
+    explist.save('exposures_{}.fits'.format(args.name), comment=args.comment)
+    stats.save('stats_{}.fits'.format(args.name), comment=args.comment)
     planner.save('desi-status-end-{}.ecsv'.format(args.name))
     if args.verbose:
         stats.summarize()
