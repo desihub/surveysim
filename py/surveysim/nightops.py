@@ -85,18 +85,13 @@ def simulate_night(night, scheduler, stats, explist, weather,
     weather_idx = 0
     dmjd_weather = weather_mjd[1] - weather_mjd[0]
 
-    def get_weather(mjd):
+    def get_weather(mjd, ra=None, dec=None):
         nonlocal weather_idx, night_changes, night_programs, config
         while mjd >= weather_mjd[weather_idx + 1]:
             weather_idx += 1
         s = (mjd - weather_mjd[weather_idx]) / dmjd_weather
-        cond_ind = np.interp(mjd, night_changes,
-                             np.arange(len(night_changes)))
-        if (cond_ind < 0) or (cond_ind >= len(night_programs)):
-            cond = 'BRIGHT'
-        else:
-            cond = night_programs[int(np.floor(cond_ind))]
-        sky = getattr(config.moon_up_factor, cond)()
+    
+        sky = desisurvey.etc.sky_level(mjd, ra, dec) 
 
         return (
             seeing[weather_idx] * (1 - s) + seeing[weather_idx + 1] * s,
@@ -140,7 +135,8 @@ def simulate_night(night, scheduler, stats, explist, weather,
         mjd_last = mjd_now
         tdead = 0.
         # Get the current observing conditions.
-        seeing_tile, transp_tile, sky_tile = get_weather(mjd_now)
+        seeing_tile, transp_tile, sky_tile = get_weather(mjd_now, 
+                ra=None, dec=None)
         # Get the next tile to observe from the scheduler.
         tileid, passnum, snr2frac_start, exposure_factor, airmass, sched_program, mjd_program_end = \
             scheduler.next_tile(mjd_now, ETC, seeing_tile, transp_tile,
@@ -198,7 +194,9 @@ def simulate_night(night, scheduler, stats, explist, weather,
                             integrating = False
                             continue_this_tile = False
                         # Get the current observing conditions.
-                        seeing_now, transp_now, sky_now = get_weather(mjd_now)
+                        seeing_now, transp_now, sky_now = get_weather(mjd_now,
+                                ra=scheduler.tiles.tileRA[idx],
+                                dec=scheduler.tiles.tileDEC[idx])
                         # Update the SNR.
                         if not ETC.update(mjd_now, seeing_now, transp_now, sky_now):
                             # Current exposure reached its target SNR according to the ETC.
