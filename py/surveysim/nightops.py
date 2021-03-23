@@ -96,7 +96,7 @@ def simulate_night(night, scheduler, stats, explist, weather,
             cond = 'BRIGHT'
         else:
             cond = night_programs[int(np.floor(cond_ind))]
-        sky = getattr(config.moon_up_factor, cond)()
+        sky = getattr(config.conditions, cond).moon_up_factor()
 
         return (
             seeing[weather_idx] * (1 - s) + seeing[weather_idx + 1] * s,

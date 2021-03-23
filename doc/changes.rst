@@ -5,6 +5,7 @@ surveysim change log
 0.12.2 (unreleased)
 -------------------
 
+* Use updated desisurvey state & config files.  (PR `#78`)
 * Work in no-pass and no-gray modes, eliminating the notion of pass
   and merging the dark and gray layers.  Update API to match associated
   desisurvey changes.  (PR `#77`_)
@@ -16,6 +17,7 @@ surveysim change log
 .. _`#75`: https://github.com/desihub/surveysim/pull/75
 .. _`#76`: https://github.com/desihub/surveysim/pull/76
 .. _`#77`: https://github.com/desihub/surveysim/pull/77
+.. _`#78`: https://github.com/desihub/surveysim/pull/78
 
 0.12.1 (2020-12-11)
 -------------------
