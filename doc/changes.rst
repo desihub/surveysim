@@ -2,7 +2,12 @@
 surveysim change log
 ====================
 
-0.12.2 (unreleased)
+0.12.3 (unreleased)
+-------------------
+
+* No changes yet.
+
+0.12.2 (2021-03-31)
 -------------------
 
 * Use updated desisurvey state & config files.  (PR `#78`)
