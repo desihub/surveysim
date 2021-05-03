@@ -126,6 +126,8 @@ def simulate_night(night, scheduler, stats, explist, weather,
     # Step through the night.
     dome_is_open = False
     mjd_now = weather_mjd[0]
+    if mjd_now < begin:
+        mjd_now = begin
     completed_last = scheduler.plan.obsend_by_program()
     while mjd_now < end:
         if not dome_is_open:
@@ -136,7 +138,7 @@ def simulate_night(night, scheduler, stats, explist, weather,
                 mjd_now = end
                 break
             idx_open = idx_now + np.argmax(dome[idx_now:])
-            assert dome[idx_open] == True and (idx_open == 0 or dome[idx_open - 1] == False)
+            assert dome[idx_open] == True and (idx_open == 0 or dome[idx_open - 1] == False or mjd_now == begin)
             mjd_now = weather_mjd[idx_open]
             if mjd_now >= end:
                 # The next dome opening is after the end of the night.
@@ -238,6 +240,10 @@ def simulate_night(night, scheduler, stats, explist, weather,
                         airmass, seeing_now, transp_now, sky_now)
                     scheduler.update_snr(tileid, ETC.snr2frac)
 
+                    # All done if we have observed all tiles.
+                    if scheduler.plan.survey_completed():
+                        break
+
                     if continue_this_tile:
                         # Prepare for the next exposure of the same tile.
                         snr2frac_start = ETC.snr2frac
@@ -266,9 +272,6 @@ def simulate_night(night, scheduler, stats, explist, weather,
         nightstats['tdead'][pidx] += tdead
         nightstats['topen'][pidx] += mjd_now - mjd_last
 
-        # All done if we have observed all tiles.
-        if scheduler.plan.survey_completed():
-            break
         # ========================================================================
 
     # Save the number of tiles completed per program in the nightly statistics.
