@@ -85,13 +85,35 @@ def simulate_night(night, scheduler, stats, explist, weather,
     weather_idx = 0
     dmjd_weather = weather_mjd[1] - weather_mjd[0]
 
+    skylevel_cache, skylevel_cache_time = None, None
+
     def get_weather(mjd, ra=None, dec=None):
-        nonlocal weather_idx, night_changes, night_programs, config
+        nonlocal weather_idx, night_changes, night_programs, config, skylevel_cache, skylevel_cache_time 
         while mjd >= weather_mjd[weather_idx + 1]:
             weather_idx += 1
         s = (mjd - weather_mjd[weather_idx]) / dmjd_weather
-    
-        sky = desisurvey.etc.sky_level(mjd, ra, dec) 
+        
+        cond_ind = np.interp(mjd, night_changes,
+                             np.arange(len(night_changes)))
+        if (cond_ind < 0) or (cond_ind >= len(night_programs)):
+            cond = 'BRIGHT'
+        else:
+            cond = night_programs[int(np.floor(cond_ind))]
+        # update sky level every 10 mins 
+        if cond == 'BRIGHT': 
+            if ra is None: 
+                sky = 1. 
+            else: 
+                if (skylevel_cache_time is None) or (mjd - skylevel_cache_time > 0.006944444445252884): 
+                    sky = desisurvey.etc.sky_level(mjd, ra, dec) 
+                    skylevel_cache_time = mjd 
+                    skylevel_cache = sky 
+                else: 
+                    sky = skylevel_cache
+            #print(getattr(config.conditions, cond).moon_up_factor())
+            #sky = 1.
+        else: 
+            sky = getattr(config.conditions, cond).moon_up_factor()
 
         return (
             seeing[weather_idx] * (1 - s) + seeing[weather_idx + 1] * s,
