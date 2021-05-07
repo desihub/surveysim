@@ -85,6 +85,15 @@ def simulate_night(night, scheduler, stats, explist, weather,
     weather_idx = 0
     dmjd_weather = weather_mjd[1] - weather_mjd[0]
 
+    # moon illumination for the night 
+    moon_ill = night_ephem['moon_illum_frac']
+    # for moon ephem calculation 
+    moon_DECRA = desisurvey.ephem.get_object_interpolator(night_ephem, 'moon', altaz=False)
+    moon_ALTAZ = desisurvey.ephem.get_object_interpolator(night_ephem, 'moon', altaz=True)
+    # for sun ephem calculation 
+    sun_DECRA = desisurvey.ephem.get_object_interpolator(night_ephem, 'sun', altaz=False)
+    sun_ALTAZ = desisurvey.ephem.get_object_interpolator(night_ephem, 'sun', altaz=True)
+
     skylevel_cache, skylevel_cache_time = None, None
 
     def get_weather(mjd, ra=None, dec=None):
@@ -93,28 +102,20 @@ def simulate_night(night, scheduler, stats, explist, weather,
             weather_idx += 1
         s = (mjd - weather_mjd[weather_idx]) / dmjd_weather
         
-        cond_ind = np.interp(mjd, night_changes,
-                             np.arange(len(night_changes)))
-        if (cond_ind < 0) or (cond_ind >= len(night_programs)):
-            cond = 'BRIGHT'
-        else:
-            cond = night_programs[int(np.floor(cond_ind))]
-        # update sky level every 10 mins 
-        if cond == 'BRIGHT': 
-            if ra is None: 
-                sky = 1. 
-            else: 
-                if (skylevel_cache_time is None) or (mjd - skylevel_cache_time > 0.006944444445252884): 
-                    sky = desisurvey.etc.sky_level(mjd, ra, dec) 
-                    skylevel_cache_time = mjd 
-                    skylevel_cache = sky 
-                else: 
-                    sky = skylevel_cache
-            #print(getattr(config.conditions, cond).moon_up_factor())
-            #sky = 1.
+        if ra is None: 
+            sky = desisurvey.etc.sky_level(mjd, ra, dec,
+                    moon_ill=moon_ill, moon_DECRA=moon_DECRA, moon_ALTAZ=moon_ALTAZ, 
+                    sun_DECRA=sun_DECRA, sun_ALTAZ=sun_ALTAZ) 
         else: 
-            sky = getattr(config.conditions, cond).moon_up_factor()
-
+            # update sky level every 10 mins 
+            if (skylevel_cache_time is None) or (mjd - skylevel_cache_time > 0.006944444445252884): 
+                sky = desisurvey.etc.sky_level(mjd, ra, dec, 
+                    moon_ill=moon_ill, moon_DECRA=moon_DECRA, moon_ALTAZ=moon_ALTAZ, 
+                    sun_DECRA=sun_DECRA, sun_ALTAZ=sun_ALTAZ) 
+                skylevel_cache_time = mjd 
+                skylevel_cache = sky 
+            else: 
+                sky = skylevel_cache
         return (
             seeing[weather_idx] * (1 - s) + seeing[weather_idx + 1] * s,
             transp[weather_idx] * (1 - s) + transp[weather_idx + 1] * s,
