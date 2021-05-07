@@ -12,8 +12,8 @@ import desisurvey.plots
 
 
 def simulate_night(night, scheduler, stats, explist, weather,
-                   use_twilight=False, update_interval=10.,
-                   plot=False, verbose=False):
+                   use_twilight=False, use_simplesky=False, 
+                   update_interval=10., plot=False, verbose=False):
     """Simulate one night of observing.
 
     Uses the online tile scheduler and exposure time calculator.
@@ -102,20 +102,32 @@ def simulate_night(night, scheduler, stats, explist, weather,
             weather_idx += 1
         s = (mjd - weather_mjd[weather_idx]) / dmjd_weather
         
-        if ra is None: 
-            sky = desisurvey.etc.sky_level(mjd, ra, dec,
-                    moon_ill=moon_ill, moon_DECRA=moon_DECRA, moon_ALTAZ=moon_ALTAZ, 
-                    sun_DECRA=sun_DECRA, sun_ALTAZ=sun_ALTAZ) 
-        else: 
-            # update sky level every 10 mins 
-            if (skylevel_cache_time is None) or (mjd - skylevel_cache_time > 0.006944444445252884): 
-                sky = desisurvey.etc.sky_level(mjd, ra, dec, 
-                    moon_ill=moon_ill, moon_DECRA=moon_DECRA, moon_ALTAZ=moon_ALTAZ, 
-                    sun_DECRA=sun_DECRA, sun_ALTAZ=sun_ALTAZ) 
-                skylevel_cache_time = mjd 
-                skylevel_cache = sky 
+        if not use_simplesky:
+            # use on-the-fly sky level calculations 
+            if ra is None: 
+                sky = desisurvey.etc.sky_level(mjd, ra, dec,
+                        moon_ill=moon_ill, moon_DECRA=moon_DECRA, moon_ALTAZ=moon_ALTAZ, 
+                        sun_DECRA=sun_DECRA, sun_ALTAZ=sun_ALTAZ) 
             else: 
-                sky = skylevel_cache
+                # update sky level every 10 mins 
+                if (skylevel_cache_time is None) or (mjd - skylevel_cache_time > 0.006944444445252884): 
+                    sky = desisurvey.etc.sky_level(mjd, ra, dec, 
+                        moon_ill=moon_ill, moon_DECRA=moon_DECRA, moon_ALTAZ=moon_ALTAZ, 
+                        sun_DECRA=sun_DECRA, sun_ALTAZ=sun_ALTAZ) 
+                    skylevel_cache_time = mjd 
+                    skylevel_cache = sky 
+                else: 
+                    sky = skylevel_cache
+        else: 
+            # use simple sky level calculation based on moon_up factor
+            cond_ind = np.interp(mjd, night_changes,
+                    np.arange(len(night_changes)))
+            if (cond_ind < 0) or (cond_ind >= len(night_programs)):
+                cond = 'BRIGHT'
+            else: 
+                cond = night_programs[int(np.floor(cond_ind))]
+            sky = getattr(config.conditions, cond).moon_up_factor()
+
         return (
             seeing[weather_idx] * (1 - s) + seeing[weather_idx + 1] * s,
             transp[weather_idx] * (1 - s) + transp[weather_idx + 1] * s,
