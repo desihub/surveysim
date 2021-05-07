@@ -12,8 +12,8 @@ import desisurvey.plots
 
 
 def simulate_night(night, scheduler, stats, explist, weather,
-                   use_twilight=False, update_interval=10.,
-                   plot=False, verbose=False):
+                   use_twilight=False, use_simplesky=False, 
+                   update_interval=10., plot=False, verbose=False):
     """Simulate one night of observing.
 
     Uses the online tile scheduler and exposure time calculator.
@@ -85,18 +85,48 @@ def simulate_night(night, scheduler, stats, explist, weather,
     weather_idx = 0
     dmjd_weather = weather_mjd[1] - weather_mjd[0]
 
-    def get_weather(mjd):
-        nonlocal weather_idx, night_changes, night_programs, config
+    # moon illumination for the night 
+    moon_ill = night_ephem['moon_illum_frac']
+    # for moon ephem calculation 
+    moon_DECRA = desisurvey.ephem.get_object_interpolator(night_ephem, 'moon', altaz=False)
+    moon_ALTAZ = desisurvey.ephem.get_object_interpolator(night_ephem, 'moon', altaz=True)
+    # for sun ephem calculation 
+    sun_DECRA = desisurvey.ephem.get_object_interpolator(night_ephem, 'sun', altaz=False)
+    sun_ALTAZ = desisurvey.ephem.get_object_interpolator(night_ephem, 'sun', altaz=True)
+
+    skylevel_cache, skylevel_cache_time = None, None
+
+    def get_weather(mjd, ra=None, dec=None):
+        nonlocal weather_idx, night_changes, night_programs, config, skylevel_cache, skylevel_cache_time 
         while mjd >= weather_mjd[weather_idx + 1]:
             weather_idx += 1
         s = (mjd - weather_mjd[weather_idx]) / dmjd_weather
-        cond_ind = np.interp(mjd, night_changes,
-                             np.arange(len(night_changes)))
-        if (cond_ind < 0) or (cond_ind >= len(night_programs)):
-            cond = 'BRIGHT'
-        else:
-            cond = night_programs[int(np.floor(cond_ind))]
-        sky = getattr(config.conditions, cond).moon_up_factor()
+        
+        if not use_simplesky:
+            # use on-the-fly sky level calculations 
+            if ra is None: 
+                sky = desisurvey.etc.sky_level(mjd, ra, dec,
+                        moon_ill=moon_ill, moon_DECRA=moon_DECRA, moon_ALTAZ=moon_ALTAZ, 
+                        sun_DECRA=sun_DECRA, sun_ALTAZ=sun_ALTAZ) 
+            else: 
+                # update sky level every 10 mins 
+                if (skylevel_cache_time is None) or (mjd - skylevel_cache_time > 0.006944444445252884): 
+                    sky = desisurvey.etc.sky_level(mjd, ra, dec, 
+                        moon_ill=moon_ill, moon_DECRA=moon_DECRA, moon_ALTAZ=moon_ALTAZ, 
+                        sun_DECRA=sun_DECRA, sun_ALTAZ=sun_ALTAZ) 
+                    skylevel_cache_time = mjd 
+                    skylevel_cache = sky 
+                else: 
+                    sky = skylevel_cache
+        else: 
+            # use simple sky level calculation based on moon_up factor
+            cond_ind = np.interp(mjd, night_changes,
+                    np.arange(len(night_changes)))
+            if (cond_ind < 0) or (cond_ind >= len(night_programs)):
+                cond = 'BRIGHT'
+            else: 
+                cond = night_programs[int(np.floor(cond_ind))]
+            sky = getattr(config.conditions, cond).moon_up_factor()
 
         return (
             seeing[weather_idx] * (1 - s) + seeing[weather_idx + 1] * s,
@@ -142,7 +172,8 @@ def simulate_night(night, scheduler, stats, explist, weather,
         mjd_last = mjd_now
         tdead = 0.
         # Get the current observing conditions.
-        seeing_tile, transp_tile, sky_tile = get_weather(mjd_now)
+        seeing_tile, transp_tile, sky_tile = get_weather(mjd_now, 
+                ra=None, dec=None)
         # Get the next tile to observe from the scheduler.
         tileid, passnum, snr2frac_start, exposure_factor, airmass, sched_program, mjd_program_end = \
             scheduler.next_tile(mjd_now, ETC, seeing_tile, transp_tile,
@@ -200,7 +231,9 @@ def simulate_night(night, scheduler, stats, explist, weather,
                             integrating = False
                             continue_this_tile = False
                         # Get the current observing conditions.
-                        seeing_now, transp_now, sky_now = get_weather(mjd_now)
+                        seeing_now, transp_now, sky_now = get_weather(mjd_now,
+                                ra=scheduler.tiles.tileRA[idx],
+                                dec=scheduler.tiles.tileDEC[idx])
                         # Update the SNR.
                         if not ETC.update(mjd_now, seeing_now, transp_now, sky_now):
                             # Current exposure reached its target SNR according to the ETC.
