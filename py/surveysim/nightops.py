@@ -112,8 +112,11 @@ def simulate_night(night, scheduler, stats, explist, weather,
     if mjd_now < begin:
         mjd_now = begin
     completed_last = scheduler.plan.obsend_by_program()
+    current_ra = None
+    current_dec = None
     while mjd_now < end:
         if not dome_is_open:
+            current_ra = current_dec = None
             # Advance to the next dome opening, if any.
             idx_now = np.searchsorted(weather_mjd, mjd_now, side='left')
             if not np.any(dome[idx_now:]):
@@ -145,8 +148,9 @@ def simulate_night(night, scheduler, stats, explist, weather,
         seeing_tile, transp_tile, sky_tile = get_weather(mjd_now)
         # Get the next tile to observe from the scheduler.
         tileid, passnum, snr2frac_start, exposure_factor, airmass, sched_program, mjd_program_end = \
-            scheduler.next_tile(mjd_now, ETC, seeing_tile, transp_tile,
-                                sky_tile)
+            scheduler.next_tile(
+                mjd_now, ETC, seeing_tile, transp_tile,
+                sky_tile, current_ra=current_ra, current_dec=current_dec)
         if tileid is None:
             # Deadtime while we delay and try again.
             mjd_now += NO_TILE_AVAIL_DELAY
@@ -155,12 +159,16 @@ def simulate_night(night, scheduler, stats, explist, weather,
                 mjd_now = next_dome_closing
                 dome_is_open = False
             tdead += mjd_now - mjd_last
+            current_ra = current_dec = None
         else:
             idx = scheduler.tiles.index(tileid)
             tileprogram = scheduler.tiles.tileprogram[idx]
             programnum = scheduler.tiles.program_index[tileprogram]
+            current_ra = scheduler.tiles.tileRA[idx]
+            current_dec = scheduler.tiles.tileDEC[idx]
             # Setup for a new field.
             mjd_now += ETC.NEW_FIELD_SETUP
+            # slew time goes here
             if mjd_now >= next_dome_closing:
                 # Setup interrupted by dome closing.
                 mjd_now = next_dome_closing

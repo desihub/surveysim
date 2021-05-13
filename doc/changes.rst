@@ -5,7 +5,10 @@ surveysim change log
 0.12.3 (unreleased)
 -------------------
 
-* No changes yet.
+* Add current_ra/current_dec to scheduler.next_tile to enable slew
+  optimization.
+* Add extra-downtime argument to surveysim randomly mark nights as bad,
+  approximately modeling extra sources of downtime.
 
 0.12.2 (2021-03-31)
 -------------------

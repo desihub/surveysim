@@ -76,6 +76,10 @@ def parse(options=None):
     parser.add_argument(
         '--config-file', default='config.yaml', metavar='CONFIG',
         help='input configuration file')
+    parser.add_argument(
+        '--extra-downtime', default=0, type=float,
+        help='Extra fractional downtime.  Dome will be treated as randomly '
+        'closed this fraction of the time, in addition to weather losses.')
 
     if options is None:
         args = parser.parse_args()
@@ -144,7 +148,9 @@ def main(args):
     scheduler = desisurvey.scheduler.Scheduler(planner)
 
     # Generate random weather conditions.
-    weather = surveysim.weather.Weather(seed=args.seed, replay=args.replay)
+    weather = surveysim.weather.Weather(
+        seed=args.seed, replay=args.replay,
+        extra_downtime=args.extra_downtime)
 
     # Loop over nights.
     num_simulated = 0
