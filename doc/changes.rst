@@ -2,7 +2,12 @@
 surveysim change log
 ====================
 
-0.12.3 (unreleased)
+0.12.4 (unreleased)
+-------------------
+
+* No changest yet.
+
+0.12.3 (2021-07-06)
 -------------------
 
 * Add current_ra/current_dec to scheduler.next_tile to enable slew
