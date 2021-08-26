@@ -5,7 +5,10 @@ surveysim change log
 0.12.4 (unreleased)
 -------------------
 
-* No changest yet.
+* Add --existing-exposures argument to surveysim.  Pointing the
+  surveysim to an existing tiles and exposures file makes a survey
+  simulation starting the day following the night of the last exposure.
+  This enables simulation of the remainder of the survey.
 
 0.12.3 (2021-07-06)
 -------------------
