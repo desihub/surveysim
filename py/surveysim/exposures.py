@@ -5,6 +5,7 @@ from __future__ import print_function, division, absolute_import
 import numpy as np
 
 import astropy.io.fits
+from astropy.time import Time
 
 import desiutil.log
 
@@ -27,7 +28,8 @@ class ExposureList(object):
         The maximum expected number of exposures, which determines the
         memory size of this object.
     """
-    def __init__(self, restore=None, max_nexp=60000):
+    def __init__(self, restore=None, max_nexp=60000,
+                 existing_exposures=None):
         self.tiles = desisurvey.tiles.get_tiles()
         self._exposures = np.empty(max_nexp, dtype=[
             ('EXPID', np.int32),
@@ -70,6 +72,31 @@ class ExposureList(object):
             self._tiledata['SNR2FRAC'] = 0.
             self._tiledata['NEXP'] = 0
             self.initial_night = None
+        if existing_exposures is not None:
+            self.add_existing_exposures(existing_exposures)
+
+    def add_existing_exposures(self, exps):
+        s = np.argsort(exps['EXPID'])
+        exps = exps[s]
+        mjds = Time(['-'.join([night[:4], night[4:6], night[6:8]])
+                     for night in exps['NIGHT']]).mjd
+
+        idx = self.tiles.index(exps['TILEID'])
+        program = self.tiles.tileprogram[idx]
+        nomtimes = desisurvey.tiles.get_nominal_program_times(program)
+
+        # we're also supposed to provide the sum of dsnr2frac on each tile.
+        tilesnr2frac = dict()
+
+        for i in range(len(exps)):
+            # dummy information for fields not present in exposures file.
+            # Could be grabbing these from the tsnr exposures file instead?
+            tileid = exps['TILEID'][i]
+            dsnr2frac = exps['EFFTIME'][i]/nomtimes[i]
+            snr2fracsofar = tilesnr2frac.get(tileid, 0) + dsnr2frac
+            tilesnr2frac[tileid] = snr2fracsofar
+            self.add(mjds[i], exps['EXPTIME'][i], exps['TILEID'][i],
+                     snr2fracsofar, dsnr2frac, 1, 1, 1, 1)
 
     def update_tiles(self, night, available, planned):
         """Update tile availability and planning status.

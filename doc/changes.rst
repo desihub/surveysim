@@ -2,10 +2,21 @@
 surveysim change log
 ====================
 
-0.12.3 (unreleased)
+0.12.4 (unreleased)
 -------------------
 
-* No changes yet.
+* Add --existing-exposures argument to surveysim.  Pointing the
+  surveysim to an existing tiles and exposures file makes a survey
+  simulation starting the day following the night of the last exposure.
+  This enables simulation of the remainder of the survey.
+
+0.12.3 (2021-07-06)
+-------------------
+
+* Add current_ra/current_dec to scheduler.next_tile to enable slew
+  optimization.
+* Add extra-downtime argument to surveysim randomly mark nights as bad,
+  approximately modeling extra sources of downtime.
 
 0.12.2 (2021-03-31)
 -------------------

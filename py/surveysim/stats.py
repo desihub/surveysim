@@ -250,3 +250,53 @@ class SurveyStatistics(object):
         yaxis.set_label_position('right')
         plt.subplots_adjust(hspace=0.05)
         return fig, axes
+
+
+def plot_one_night(exps, tiledata, night, startdate, center_l=180):
+    import ephem
+    from astropy import units as u
+    from astropy.coordinates import SkyCoord, search_around_sky
+    from matplotlib import pyplot as p
+    startmjd = int(desisurvey.utils.local_noon_on_date(
+        desisurvey.utils.get_date(startdate)).mjd)
+    nightnum = night - startmjd
+    mstarted = (tiledata['PLANNED'] <= nightnum) & (tiledata['PLANNED'] >= 0)
+    tiles = desisurvey.tiles.get_tiles()
+    p.clf()
+    p.subplots_adjust(hspace=0)
+    p.subplots_adjust(left=0.1, right=0.9)
+    programs = ['DARK', 'BRIGHT']
+    expindex = tiles.index(exps['TILEID'])
+    expnight = exps['MJD'].astype('i4')
+    m = expnight == night
+    medianmjd = np.median(exps['MJD'][m])
+    mayall = ephem.Observer()
+    config = desisurvey.config.Configuration()
+    coord = SkyCoord(ra=tiles.tileRA*u.deg, dec=tiles.tileDEC*u.deg)
+    mayall.lon = config.location.longitude().to(u.radian).value
+    mayall.lat = config.location.latitude().to(u.radian).value
+    mayall.date = medianmjd+(2400000.5-2415020)
+    moon = ephem.Moon()
+    moon.compute(mayall)
+    tile_diameter = config.tile_radius()*2
+    for i, prog in enumerate(programs):
+        mprog = prog == tiles.tileprogram
+        mprogstarted = mstarted & mprog
+        p.subplot(len(programs), 1, i+1)
+        ra = ((tiles.tileRA - (center_l-180)) % 360)+(center_l-180)
+        p.plot(ra[mprog], tiles.tileDEC[mprog], '.', color='gray',
+               markersize=1)
+        p.plot(ra[mprogstarted], tiles.tileDEC[mprogstarted], '.',
+               color='green', markersize=5)
+        m = (expnight == night) & (tiles.tileprogram[expindex] == prog)
+        p.plot(ra[expindex[m]], tiles.tileDEC[expindex[m]], 'r-+')
+        idx1, idx2, sep2d, dist3d = search_around_sky(
+            coord[expindex[m]], coord[expindex[m]], tile_diameter*10)
+        mdiff = expindex[m][idx1] != expindex[m][idx2]
+        if np.sum(mdiff) > 0:
+            print(f'min separation {prog}: {np.min(sep2d[mdiff])}')
+        p.gca().set_aspect('equal')
+        p.plot(((np.degrees(moon.ra)-(center_l-180)) % 360)+(center_l-180),
+               np.degrees(moon.dec), 'o',
+               color='yellow', markersize=10,
+               markeredgecolor='black')

@@ -30,6 +30,8 @@ import surveysim.stats
 import surveysim.exposures
 import surveysim.nightops
 
+from astropy.table import Table
+
 
 def parse(options=None):
     """Parse command-line options for running survey simulations.
@@ -78,6 +80,14 @@ def parse(options=None):
         help='input configuration file')
     parser.add_argument('--simplesky', action='store_true',
         help='turn off on-the-fly sky level calculations')
+    parser.add_argument(
+        '--extra-downtime', default=0, type=float,
+        help='Extra fractional downtime.  Dome will be treated as randomly '
+        'closed this fraction of the time, in addition to weather losses.')
+    parser.add_argument(
+        '--existing-exposures', default=None, type=str,
+        help='Existing exposures file to use for simulating an in-progress '
+        'survey.')
 
     if options is None:
         args = parser.parse_args()
@@ -127,9 +137,23 @@ def main(args):
     if args.tiles_file is not None:
         config.tiles_file.set_value(args.tiles_file)
 
+    if args.existing_exposures is not None:
+        exps = Table.read(args.existing_exposures)
+        tiles = desisurvey.tiles.get_tiles()
+        idx, mask = tiles.index(exps['TILEID'], return_mask=True)
+        firstnight = max(exps['NIGHT'][mask])
+        if args.start != config.first_day():
+            raise ValueError('Cannot set both start and existing-exposures!')
+        args.start = '-'.join(
+            [firstnight[:4], firstnight[4:6], firstnight[6:]])
+        args.start = desisurvey.utils.get_date(args.start)
+        exps = exps[mask]
+    else:
+        exps = None
+
     # Initialize simulation progress tracking.
     stats = surveysim.stats.SurveyStatistics(args.start, args.stop)
-    explist = surveysim.exposures.ExposureList()
+    explist = surveysim.exposures.ExposureList(existing_exposures=exps)
 
     # Initialize the survey strategy rules.
     if args.rules is None:
@@ -146,7 +170,9 @@ def main(args):
     scheduler = desisurvey.scheduler.Scheduler(planner)
 
     # Generate random weather conditions.
-    weather = surveysim.weather.Weather(seed=args.seed, replay=args.replay)
+    weather = surveysim.weather.Weather(
+        seed=args.seed, replay=args.replay,
+        extra_downtime=args.extra_downtime)
 
     # Loop over nights.
     num_simulated = 0

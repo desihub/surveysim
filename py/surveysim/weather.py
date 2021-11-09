@@ -50,8 +50,13 @@ class Weather(object):
         All other parameters are ignored when this is provided. A relative path
         name refers to the :meth:`configuration output path
         <desisurvey.config.Configuration.get_path>`.
+    extra_downtime : float
+        Additionally close the dome completely on some nights.  Nights are
+        chosen randomly, with the chance of the night being closed equal to
+        extra_random_close_fraction.  This is intended to include margin.
     """
-    def __init__(self, seed=1, replay='random', time_step=5, restore=None):
+    def __init__(self, seed=1, replay='random', time_step=5, restore=None,
+                 extra_downtime=0):
         if not isinstance(time_step, u.Quantity):
             time_step = time_step * u.min
         self.log = desiutil.log.get_logger()
@@ -122,6 +127,9 @@ class Weather(object):
         # weather to replay during the simulation.
         dome_closed_frac = desimodel.weather.dome_closed_fractions(
             start_date, stop_date, replay=replay)
+        r = gen.uniform(size=num_nights)
+        r2 = gen.uniform(size=num_nights)
+        dome_closed_frac[r2 < extra_downtime] = 1.
 
         # Convert fractions of scheduled time to hours per night.
         ilo, ihi = (start_date - ephem.start_date).days, (stop_date - ephem.start_date).days
@@ -136,7 +144,6 @@ class Weather(object):
         # Pick scenarios 1+2 with probability equal to the closed fraction.
         # Use a fixed number of random numbers to decouple from the seeing
         # and transparency sampling below.
-        r = gen.uniform(size=num_nights)
         self._table['open'] = np.ones(num_rows, bool)
         for i in range(num_nights):
             sl = slice(i * steps_per_day, (i + 1) * steps_per_day)
