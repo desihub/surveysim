@@ -2,7 +2,12 @@
 surveysim change log
 ====================
 
-0.12.4 (unreleased)
+0.12.5 (unreleased)
+-------------------
+
+* No changes yet.
+
+0.12.4 (2023-01-12)
 -------------------
 
 * Add --existing-exposures argument to surveysim.  Pointing the
