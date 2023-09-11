@@ -39,6 +39,7 @@ jobs:
                 svn export https://desi.lbl.gov/svn/code/desimodel/${DESIMODEL_DATA}/data
                 python -m pip install git+https://github.com/desihub/specsim.git@v0.16#egg=specsim
                 python -m pip install git+https://github.com/desihub/speclite.git@v0.16#egg=speclite
+                python -m pip install git+https://github.com/desihub/desisurvey.git@0.19.0#egg=desisurvey
             - name: Run the test
               run: DESIMODEL=$(pwd) pytest
 
@@ -71,7 +72,7 @@ jobs:
                 svn export https://desi.lbl.gov/svn/code/desimodel/${DESIMODEL_DATA}/data
                 python -m pip install git+https://github.com/desihub/specsim.git@v0.16#egg=specsim
                 python -m pip install git+https://github.com/desihub/speclite.git@v0.16#egg=speclite
-                python -m pip install -r requirements.txt
+                python -m pip install git+https://github.com/desihub/desisurvey.git@0.19.0#egg=desisurvey
             - name: Run the test with coverage
               run: DESIMODEL=$(pwd) pytest --cov
             - name: Coveralls
