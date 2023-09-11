@@ -126,7 +126,7 @@ jobs:
                 python-version: ${{ matrix.python-version }}
             - name: Install Python dependencies
               run: python -m pip install --upgrade pip setuptools wheel pycodestyle
-            - name: Test the style; failures are allowed
+            - name: Test the style; failures can be allowed if necessary
               # This is equivalent to an allowed falure.
-              continue-on-error: true
+              # continue-on-error: true
               run: pycodestyle --count py/surveysim
