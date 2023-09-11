@@ -1,9 +1,14 @@
-"""Simulate stochastic observing weather conditions.
+# Licensed under a 3-clause BSD style license - see LICENSE.rst
+# -*- coding: utf-8 -*-
+"""
+=================
+surveysim.weather
+=================
+
+Simulate stochastic observing weather conditions.
 
 The simulated conditions include seeing, transparency and the dome-open fraction.
 """
-from __future__ import print_function, division, absolute_import
-
 from datetime import datetime
 
 import numpy as np

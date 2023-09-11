@@ -1,6 +1,12 @@
-"""Record simulated exposures and collect per-tile statistics.
+# Licensed under a 3-clause BSD style license - see LICENSE.rst
+# -*- coding: utf-8 -*-
 """
-from __future__ import print_function, division, absolute_import
+===================
+surveysim.exposures
+===================
+
+Record simulated exposures and collect per-tile statistics.
+"""
 
 import numpy as np
 

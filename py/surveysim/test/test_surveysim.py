@@ -1,5 +1,5 @@
-from __future__ import print_function, division, absolute_import
-
+# Licensed under a 3-clause BSD style license - see LICENSE.rst
+# -*- coding: utf-8 -*-
 import unittest
 import os.path
 

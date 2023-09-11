@@ -1,4 +1,11 @@
-"""Script wrapper for running survey simulations.
+# Licensed under a 3-clause BSD style license - see LICENSE.rst
+# -*- coding: utf-8 -*-
+"""
+===========================
+surveysim.scripts.surveysim
+===========================
+
+Script wrapper for running survey simulations.
 
 Simulate a sequence of observations until either the nominal
 survey end date is reached, or all tiles have been observed.
@@ -8,7 +15,6 @@ To run this script from the command line, use the ``surveysim``
 entry point that is created when this package is installed, and
 should be in your shell command search path.
 """
-from __future__ import print_function, division, absolute_import
 
 import argparse
 import datetime
@@ -39,53 +45,40 @@ def parse(options=None):
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--verbose', action='store_true',
-        help='display log messages with severity >= info')
+                        help='display log messages with severity >= info')
     parser.add_argument('--debug', action='store_true',
-        help='display log messages with severity >= debug (implies verbose)')
+                        help='display log messages with severity >= debug (implies verbose)')
     parser.add_argument('--log-interval', type=int, default=100, metavar='N',
-        help='nightly interval for logging periodic info messages')
-    parser.add_argument(
-        '--start', type=str, default=None, metavar='DATE',
-        help='survey starts on the evening of this day, formatted as YYYY-MM-DD')
-    parser.add_argument(
-        '--stop', type=str, default=None, metavar='DATE',
-        help='survey stops on the morning of this day, formatted as YYYY-MM-DD')
-    parser.add_argument(
-        '--name', type=str, default='surveysim', metavar='NAME',
-        help='name to use for saving simulated stats and exposures')
-    parser.add_argument(
-        '--comment', type=str, default='', metavar='COMMENT',
-        help='comment to save with simulated stats and exposures')
-    parser.add_argument(
-        '--rules', type=str, default=None, metavar='YAML',
-        help='name of YAML file with survey strategy rules to use')
+                        help='nightly interval for logging periodic info messages')
+    parser.add_argument('--start', type=str, default=None, metavar='DATE',
+                        help='survey starts on the evening of this day, formatted as YYYY-MM-DD')
+    parser.add_argument('--stop', type=str, default=None, metavar='DATE',
+                        help='survey stops on the morning of this day, formatted as YYYY-MM-DD')
+    parser.add_argument('--name', type=str, default='surveysim', metavar='NAME',
+                        help='name to use for saving simulated stats and exposures')
+    parser.add_argument('--comment', type=str, default='', metavar='COMMENT',
+                        help='comment to save with simulated stats and exposures')
+    parser.add_argument('--rules', type=str, default=None, metavar='YAML',
+                        help='name of YAML file with survey strategy rules to use')
     parser.add_argument('--twilight', action='store_true',
-        help='include twilight in the scheduled time')
+                        help='include twilight in the scheduled time')
     parser.add_argument('--save-restore', action='store_true',
-        help='save/restore the planner and scheduler state after each night')
-    parser.add_argument(
-        '--seed', type=int, default=1, metavar='N',
-        help='random number seed for generating random observing conditions')
-    parser.add_argument(
-        '--replay', type=str, default='random', metavar='REPLAY',
-        help='Replay specific weather years, e.g., "Y2015,Y2011" or "random"')
-    parser.add_argument(
-        '--output-path', default=None, metavar='PATH',
-        help='output path to use instead of config.output_path')
-    parser.add_argument(
-        '--tiles-file', default=None, metavar='TILES',
-        help='name of tiles file to use instead of config.tiles_file')
-    parser.add_argument(
-        '--config-file', default='config.yaml', metavar='CONFIG',
-        help='input configuration file')
-    parser.add_argument(
-        '--extra-downtime', default=0, type=float,
-        help='Extra fractional downtime.  Dome will be treated as randomly '
-        'closed this fraction of the time, in addition to weather losses.')
-    parser.add_argument(
-        '--existing-exposures', default=None, type=str,
-        help='Existing exposures file to use for simulating an in-progress '
-        'survey.')
+                        help='save/restore the planner and scheduler state after each night')
+    parser.add_argument('--seed', type=int, default=1, metavar='N',
+                        help='random number seed for generating random observing conditions')
+    parser.add_argument('--replay', type=str, default='random', metavar='REPLAY',
+                        help='Replay specific weather years, e.g., "Y2015,Y2011" or "random"')
+    parser.add_argument('--output-path', default=None, metavar='PATH',
+                        help='output path to use instead of config.output_path')
+    parser.add_argument('--tiles-file', default=None, metavar='TILES',
+                        help='name of tiles file to use instead of config.tiles_file')
+    parser.add_argument('--config-file', default='config.yaml', metavar='CONFIG',
+                        help='input configuration file')
+    parser.add_argument('--extra-downtime', default=0, type=float,
+                        help='Extra fractional downtime.  Dome will be treated as randomly '
+                             'closed this fraction of the time, in addition to weather losses.')
+    parser.add_argument('--existing-exposures', default=None, type=str,
+                        help='Existing exposures file to use for simulating an in-progress survey.')
 
     if options is None:
         args = parser.parse_args()
