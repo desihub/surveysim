@@ -1,0 +1,18 @@
+#!/usr/bin/env python
+"""
+Simulate different conditions to study exposure times
+"""
+from __future__ import print_function, division, absolute_import
+
+import sys
+
+import surveysim.scripts.etcstudy
+
+
+if __name__ == '__main__':
+    try:
+        args = surveysim.scripts.etcstudy.parse()
+        surveysim.scripts.etcstudy.main(args)
+    except RuntimeError as e: #Exception as e:
+        print(e)
+        sys.exit(-1)
