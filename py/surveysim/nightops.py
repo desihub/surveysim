@@ -1,6 +1,12 @@
-"""Simulate one night of observing.
+# Licensed under a 3-clause BSD style license - see LICENSE.rst
+# -*- coding: utf-8 -*-
 """
-from __future__ import print_function, division, absolute_import
+==================
+surveysim.nightops
+==================
+
+Simulate one night of observing.
+"""
 
 import numpy as np
 
@@ -124,7 +130,7 @@ def simulate_night(night, scheduler, stats, explist, weather,
                 mjd_now = end
                 break
             idx_open = idx_now + np.argmax(dome[idx_now:])
-            assert dome[idx_open] == True and (idx_open == 0 or dome[idx_open - 1] == False or mjd_now == begin)
+            assert dome[idx_open] and (idx_open == 0 or not dome[idx_open - 1] or mjd_now == begin)
             mjd_now = weather_mjd[idx_open]
             if mjd_now >= end:
                 # The next dome opening is after the end of the night.
@@ -135,7 +141,7 @@ def simulate_night(night, scheduler, stats, explist, weather,
                 next_dome_closing = end
             else:
                 idx_close = idx_open + np.argmin(dome[idx_open:])
-                assert dome[idx_close] == False and dome[idx_close - 1] == True
+                assert not dome[idx_close] and dome[idx_close - 1]
                 next_dome_closing = min(end, weather_mjd[idx_close])
             dome_is_open = True
             weather_idx = idx_open

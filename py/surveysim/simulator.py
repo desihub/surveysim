@@ -1,6 +1,12 @@
-"""Top-level survey simulation manager.
+# Licensed under a 3-clause BSD style license - see LICENSE.rst
+# -*- coding: utf-8 -*-
 """
-from __future__ import print_function, division, absolute_import
+===================
+surveysim.simulator
+===================
+
+Top-level survey simulation manager.
+"""
 
 import datetime
 
@@ -52,8 +58,7 @@ class Simulator(object):
         # Validate date range.
         if start_date >= stop_date:
             raise ValueError('Expected start_date < stop_date.')
-        if (start_date < self.config.first_day() or
-            stop_date > self.config.last_day()):
+        if (start_date < self.config.first_day() or stop_date > self.config.last_day()):
             raise ValueError('Cannot simulate beyond nominal survey dates.')
         self.start_date = start_date
         self.stop_date = stop_date
@@ -73,9 +78,7 @@ class Simulator(object):
         self.plan = astropy.table.Table.read(self.config.get_path(plan))
         assert np.all(self.sp.tiles['tileid'] == self.plan['tileid'])
 
-        if (stats is not None) and (
-            len(stats) !=
-            (self.config.last_day() - self.config.first_day()).days):
+        if (stats is not None) and (len(stats) != (self.config.last_day() - self.config.first_day()).days):
             raise ValueError('Input stats table has wrong length.')
         self.stats = stats
 

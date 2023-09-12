@@ -1,6 +1,12 @@
-"""Record simulated nightly statistics by program.
+# Licensed under a 3-clause BSD style license - see LICENSE.rst
+# -*- coding: utf-8 -*-
 """
-from __future__ import print_function, division, absolute_import
+===============
+surveysim.stats
+===============
+
+Record simulated nightly statistics by program.
+"""
 
 import numpy as np
 
@@ -48,14 +54,14 @@ class SurveyStatistics(object):
             raise ValueError('Expected start_date < stop_date.')
         # Build our internal array.
         dtype = []
-        for name in 'MJD', 'tsched',:
+        for name in ('MJD', 'tsched'):
             dtype.append((name, np.float))
         nprograms = len(self.tiles.programs)
-        for name in 'topen', 'tdead',:
+        for name in ('topen', 'tdead'):
             dtype.append((name, np.float, (nprograms,)))
-        for name in 'tscience', 'tsetup', 'tsplit',:
+        for name in ('tscience', 'tsetup', 'tsplit'):
             dtype.append((name, np.float, (nprograms,)))
-        for name in 'completed', 'nexp', 'nsetup', 'nsplit', 'nsetup_abort', 'nsplit_abort',:
+        for name in ('completed', 'nexp', 'nsetup', 'nsplit', 'nsetup_abort', 'nsplit_abort'):
             dtype.append((name, np.int32, (nprograms,)))
         self._data = np.zeros(self.num_nights, dtype)
         if restore is not None:
@@ -223,7 +229,7 @@ class SurveyStatistics(object):
         for program in self.tiles.programs:
             progidx = self.tiles.program_index[program]
             c = desisurvey.plots.program_color.get(program, 'purple')
-            scale = 86400 / ntiles[progidx] # secs / tile
+            scale = 86400 / ntiles[progidx]  # secs / tile
             ax.plot(dt[:last], scale * np.cumsum(tsetup[:, progidx]), '-', c=c)
             ax.plot(dt[:last], scale * np.cumsum(tsplit[:, progidx]), '--', c=c)
             ax.plot(dt[:last], scale * np.cumsum(D['tdead'][:last, progidx]), ':', c=c)

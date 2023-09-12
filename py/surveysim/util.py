@@ -1,6 +1,12 @@
-"""Simulation utilities that may be used by other packages.
+# Licensed under a 3-clause BSD style license - see LICENSE.rst
+# -*- coding: utf-8 -*-
 """
-from __future__ import print_function, division, absolute_import
+==============
+surveysim.util
+==============
+
+Simulation utilities that may be used by other packages.
+"""
 
 import numpy as np
 

@@ -1,3 +1,5 @@
+# Licensed under a 3-clause BSD style license - see LICENSE.rst
+# -*- coding: utf-8 -*-
 import unittest
 import datetime
 
@@ -27,9 +29,9 @@ class TestExposures(Tester):
         exp.save('exposures_test.fits', comment='unit test')
         exp2 = ExposureList(restore='exposures_test.fits')
         # Check for consistency
-        #self.assertEqual(stats._data.dtype, stats2._data.dtype)
-        #for name in stats._data.dtype.names:
-        #    self.assertTrue(np.array_equal(stats._data[name], stats2._data[name]))
+        # self.assertEqual(stats._data.dtype, stats2._data.dtype)
+        # for name in stats._data.dtype.names:
+        #     self.assertTrue(np.array_equal(stats._data[name], stats2._data[name]))
 
 
 def test_suite():
