@@ -8,8 +8,8 @@ DESI Survey Simulations
     :target: https://github.com/desihub/surveysim/actions
     :alt: GitHub Actions CI Status
 
-.. |Coveralls Status| image:: https://coveralls.io/repos/desihub/surveysim/badge.svg
-    :target: https://coveralls.io/github/desihub/surveysim
+.. |Coveralls Status| image:: https://coveralls.io/repos/desihub/surveysim/badge.svg?branch=main
+    :target: https://coveralls.io/github/desihub/surveysim?branch=main
     :alt: Test Coverage Status
 
 .. |Documentation Status| image:: https://readthedocs.org/projects/surveysim/badge/?version=latest
