@@ -2,10 +2,17 @@
 surveysim change log
 ====================
 
-0.12.6 (unreleased)
+0.12.7 (2024-05-01)
 -------------------
 
 * No changes yet.
+
+0.12.6 (2024-05-01)
+-------------------
+
+* Moved testing to GitHub Actions; readthedocs updates (PR `#82`_).
+
+.. _`#82`: https://github.com/desihub/surveysim/pull/82
 
 0.12.5 (2023-01-12)
 -------------------
