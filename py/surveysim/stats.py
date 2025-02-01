@@ -55,12 +55,12 @@ class SurveyStatistics(object):
         # Build our internal array.
         dtype = []
         for name in ('MJD', 'tsched'):
-            dtype.append((name, np.float))
+            dtype.append((name, np.float64))
         nprograms = len(self.tiles.programs)
         for name in ('topen', 'tdead'):
-            dtype.append((name, np.float, (nprograms,)))
+            dtype.append((name, np.float64, (nprograms,)))
         for name in ('tscience', 'tsetup', 'tsplit'):
-            dtype.append((name, np.float, (nprograms,)))
+            dtype.append((name, np.float64, (nprograms,)))
         for name in ('completed', 'nexp', 'nsetup', 'nsplit', 'nsetup_abort', 'nsplit_abort'):
             dtype.append((name, np.int32, (nprograms,)))
         self._data = np.zeros(self.num_nights, dtype)
