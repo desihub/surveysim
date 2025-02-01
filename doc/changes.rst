@@ -2,10 +2,13 @@
 surveysim change log
 ====================
 
-0.12.7 (2024-05-01)
+0.12.7 (unreleased)
 -------------------
 
-* No changes yet.
+* Require `pytest` instead of `python setup.py test` for compatibility
+  with desiutil 3.5.0 (PR `#84`_).
+
+.. _`#84`: https://github.com/desihub/surveysim/pull/84
 
 0.12.6 (2024-05-01)
 -------------------
