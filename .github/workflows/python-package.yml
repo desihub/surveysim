@@ -78,7 +78,7 @@ jobs:
             - name: Install DESI packages
               env:
                   DESIMODEL_VERSION: 0.19.3
-                  DESISURVEY_VERSION: 0.20.0
+                  DESISURVEY_VERSION: update-test-matrix
               run: |
                 python -m pip install desiutil specsim
                 python -m pip install git+https://github.com/desihub/desimodel.git@${DESIMODEL_VERSION}#egg=desimodel
