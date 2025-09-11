@@ -16,7 +16,7 @@ from setuptools import setup, find_packages
 # desiutil needs to import some of its own code.
 #
 sys.path.insert(int(sys.path[0] == ''),os.path.abspath('./py'))
-from desiutil.setup import DesiModule, DesiVersion, get_version
+# from desiutil.setup import DesiModule, DesiVersion, get_version
 #
 # Begin setup
 #
@@ -33,7 +33,7 @@ setup_keywords['url'] = 'https://github.com/desihub/surveysim'
 #
 # END OF SETTINGS THAT NEED TO BE CHANGED.
 #
-setup_keywords['version'] = get_version(setup_keywords['name'])
+setup_keywords['version'] = '0.12.6.dev460'
 #
 # Use README.rst as long_description.
 #
@@ -57,16 +57,16 @@ setup_keywords['zip_safe'] = False
 setup_keywords['use_2to3'] = False
 setup_keywords['packages'] = find_packages('py')
 setup_keywords['package_dir'] = {'':'py'}
-setup_keywords['cmdclass'] = {'module_file': DesiModule, 'version': DesiVersion, 'sdist': DistutilsSdist}
+# setup_keywords['cmdclass'] = {'module_file': DesiModule, 'version': DesiVersion, 'sdist': DistutilsSdist}
 setup_keywords['test_suite']='{name}.test.test_suite'.format(**setup_keywords)
 #
 # Autogenerate command-line scripts.
 #
-# setup_keywords['entry_points'] = {'console_scripts':['desiInstall = desiutil.install.desi_install:main']}
+# setup_keywords['entry_points'] = {'console_scripts':['surveysim = surveysim.scripts.surveysim:main']}
 #
 # Add internal data directories.
 #
-setup_keywords['package_data'] = {'surveysim': ['data/*']}
+# setup_keywords['package_data'] = {'surveysim': ['data/*']}
 #
 # Run setup command.
 #
