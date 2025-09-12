@@ -32,11 +32,3 @@ class TestExposures(Tester):
         # self.assertEqual(stats._data.dtype, stats2._data.dtype)
         # for name in stats._data.dtype.names:
         #     self.assertTrue(np.array_equal(stats._data[name], stats2._data[name]))
-
-
-def test_suite():
-    """Allows testing of only this module with the command::
-
-        python setup.py test -m <modulename>
-    """
-    return unittest.defaultTestLoader.loadTestsFromName(__name__)

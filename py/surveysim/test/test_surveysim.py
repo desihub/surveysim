@@ -28,11 +28,3 @@ class TestSimulator(Tester):
         self.assertTrue(os.path.exists(config.get_path('exposures_test.fits')))
         stats = surveysim.stats.SurveyStatistics(restore='stats_test.fits')
         exposures = surveysim.exposures.ExposureList(restore='exposures_test.fits')
-
-
-def test_suite():
-    """Allows testing of only this module with the command::
-
-        python setup.py test -m <modulename>
-    """
-    return unittest.defaultTestLoader.loadTestsFromName(__name__)

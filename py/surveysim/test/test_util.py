@@ -52,11 +52,3 @@ class TestUtil(Tester):
         bad_exposures.add(58850., 1., tileID, 1., 1., 1., 1.1, 0.9, 1.0)
         with self.assertRaises(ValueError):
             output = add_calibration_exposures(bad_exposures)
-
-
-def test_suite():
-    """Allows testing of only this module with the command::
-
-        python setup.py test -m <modulename>
-    """
-    return unittest.defaultTestLoader.loadTestsFromName(__name__)

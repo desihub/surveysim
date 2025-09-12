@@ -70,11 +70,3 @@ class TestWeather(Tester):
         self.assertEqual(self.w._table.meta['STOP'], w._table.meta['STOP'])
         self.assertEqual(self.w._table.meta['NIGHTS'], w._table.meta['NIGHTS'])
         self.assertEqual(self.w._table.meta['STEPS'], w._table.meta['STEPS'])
-
-
-def test_suite():
-    """Allows testing of only this module with the command::
-
-        python setup.py test -m <modulename>
-    """
-    return unittest.defaultTestLoader.loadTestsFromName(__name__)
