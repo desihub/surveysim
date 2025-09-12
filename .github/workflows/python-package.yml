@@ -16,32 +16,61 @@ jobs:
         strategy:
             fail-fast: true
             matrix:
-                os: [ubuntu-22.04]
-                python-version: ['3.9', '3.10']
-        env:
-            DESIMODEL_DATA: branches/test-0.18
+                include:
+                    - os: ubuntu-latest
+                      python-version: '3.13'
+                      numpy-version: '<3'
+                      matplotlib-version: '<3.11'
+                      astropy-version: '<7'
+                      specutils-version: '<3'
+                    - os: ubuntu-latest
+                      python-version: '3.12'
+                      numpy-version: '<2.3'
+                      matplotlib-version: '<3.10'
+                      astropy-version: '<7'
+                      specutils-version: '<2'
+                    - os: ubuntu-latest
+                      python-version: '3.11'
+                      numpy-version: '<2.2'
+                      matplotlib-version: '<3.9'
+                      astropy-version: '<7'
+                      specutils-version: '<1.19'
+                    - os: ubuntu-latest
+                      python-version: '3.10'
+                      numpy-version: '<2'
+                      matplotlib-version: '<3.7'
+                      astropy-version: '<7'
+                      specutils-version: '<1.15'
 
         steps:
+            - name: Install system packages
+              run: sudo apt install libbz2-dev subversion
             - name: Checkout code
-              uses: actions/checkout@v3
-              with:
-                fetch-depth: 0
+              uses: actions/checkout@v4
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                 python-version: ${{ matrix.python-version }}
             - name: Install Python dependencies
               run: |
-                python -m pip install --upgrade pip setuptools wheel
-                python -m pip install pytest
-                python -m pip install -r requirements.txt
-                python -m pip install specutils specsim
-                python -m pip install git+https://github.com/desihub/desiutil.git@3.4.3#egg=desiutil
-                python -m pip install git+https://github.com/desihub/desimodel.git@0.18.0#egg=desimodel
-                svn export https://desi.lbl.gov/svn/code/desimodel/${DESIMODEL_DATA}/data
-                python -m pip install git+https://github.com/desihub/desisurvey.git@0.20.0#egg=desisurvey
+                python -m pip install --upgrade pip setuptools wheel ephem pytz pytest
+                python -m pip install "numpy${{ matrix.numpy-version }}" "matplotlib${{ matrix.matplotlib-version }}" "astropy${{ matrix.astropy-version }}" "specutils${{ matrix.specutils-version }}"
+            - name: Install DESI packages
+              env:
+                  DESIMODEL_VERSION: 0.19.3
+                  DESISURVEY_VERSION: update-test-matrix
+              run: |
+                python -m pip install desiutil specsim
+                python -m pip install git+https://github.com/desihub/desimodel.git@${DESIMODEL_VERSION}#egg=desimodel
+                python -m pip install git+https://github.com/desihub/desisurvey.git@${DESISURVEY_VERSION}#egg=desisurvey
+            - name: Install desimodel data
+              env:
+                  DESIMODEL_DATA: branches/test-0.19
+              run: install_desimodel_data --desimodel-version ${DESIMODEL_DATA}
+            - name: Print Python package versions
+              run: python -m pip freeze
             - name: Run the test
-              run: DESIMODEL=$(pwd) pytest
+              run: pytest
 
     coverage:
         name: Test coverage
@@ -49,32 +78,38 @@ jobs:
         strategy:
             fail-fast: true
             matrix:
-                os: [ubuntu-22.04]
+                os: [ubuntu-latest]
                 python-version: ['3.10']
-        env:
-            DESIMODEL_DATA: branches/test-0.18
 
         steps:
+            - name: Install system packages
+              run: sudo apt install libbz2-dev subversion
             - name: Checkout code
-              uses: actions/checkout@v3
-              with:
-                fetch-depth: 0
+              uses: actions/checkout@v4
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                 python-version: ${{ matrix.python-version }}
             - name: Install Python dependencies
               run: |
-                python -m pip install --upgrade pip setuptools wheel
-                python -m pip install pytest pytest-cov coveralls
-                python -m pip install -r requirements.txt
-                python -m pip install specutils specsim
-                python -m pip install git+https://github.com/desihub/desiutil.git@3.4.3#egg=desiutil
-                python -m pip install git+https://github.com/desihub/desimodel.git@0.18.0#egg=desimodel
-                svn export https://desi.lbl.gov/svn/code/desimodel/${DESIMODEL_DATA}/data
-                python -m pip install git+https://github.com/desihub/desisurvey.git@0.20.0#egg=desisurvey
+                python -m pip install --upgrade pip setuptools wheel ephem pytz pytest pytest-cov coveralls
+                python -m pip install "numpy<1.23" "matplotlib<3.7" "astropy<6.1" "specutils<1.15"
+            - name: Install DESI packages
+              env:
+                  DESIMODEL_VERSION: 0.19.3
+                  DESISURVEY_VERSION: update-test-matrix
+              run: |
+                python -m pip install desiutil specsim
+                python -m pip install git+https://github.com/desihub/desimodel.git@${DESIMODEL_VERSION}#egg=desimodel
+                python -m pip install git+https://github.com/desihub/desisurvey.git@${DESISURVEY_VERSION}#egg=desisurvey
+            - name: Install desimodel data
+              env:
+                  DESIMODEL_DATA: branches/test-0.19
+              run: install_desimodel_data --desimodel-version ${DESIMODEL_DATA}
+            - name: Print Python package versions
+              run: python -m pip freeze
             - name: Run the test with coverage
-              run: DESIMODEL=$(pwd) pytest --cov
+              run: pytest --cov
             - name: Coveralls
               env:
                 COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
@@ -87,16 +122,14 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                os: [ubuntu-22.04]
+                os: [ubuntu-latest]
                 python-version: ['3.10']
 
         steps:
             - name: Checkout code
-              uses: actions/checkout@v3
-              with:
-                fetch-depth: 0
+              uses: actions/checkout@v4
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                 python-version: ${{ matrix.python-version }}
             - name: Install Python dependencies
@@ -110,16 +143,14 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                os: [ubuntu-22.04]
+                os: [ubuntu-latest]
                 python-version: ['3.10']
 
         steps:
             - name: Checkout code
-              uses: actions/checkout@v3
-              with:
-                fetch-depth: 0
+              uses: actions/checkout@v4
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                 python-version: ${{ matrix.python-version }}
             - name: Install Python dependencies
@@ -127,4 +158,4 @@ jobs:
             - name: Test the style; failures can be allowed if necessary
               # This is equivalent to an allowed falure.
               # continue-on-error: true
-              run: pycodestyle --count py/surveysim
+              run: pycodestyle --count --statistics py/surveysim
