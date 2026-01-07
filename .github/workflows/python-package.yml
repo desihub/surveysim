@@ -21,7 +21,7 @@ jobs:
                       python-version: '3.13'
                       numpy-version: '<3'
                       matplotlib-version: '<3.11'
-                      astropy-version: '<7'
+                      astropy-version: '<8'
                       specutils-version: '<3'
                     - os: ubuntu-latest
                       python-version: '3.12'
