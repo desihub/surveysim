@@ -57,16 +57,16 @@ jobs:
                 python -m pip install "numpy${{ matrix.numpy-version }}" "matplotlib${{ matrix.matplotlib-version }}" "astropy${{ matrix.astropy-version }}" "specutils${{ matrix.specutils-version }}"
             - name: Install DESI packages
               env:
-                  DESIMODEL_VERSION: 0.19.3
+                  DESIMODEL_VERSION: 0.20.0
                   DESISURVEY_VERSION: update-test-matrix
               run: |
                 python -m pip install desiutil
                 python -m pip install --no-build-isolation specsim
-                python -m pip install git+https://github.com/desihub/desimodel.git@${DESIMODEL_VERSION}#egg=desimodel
+                python -m pip install desimodel==${DESIMODEL_VERSION}
                 python -m pip install git+https://github.com/desihub/desisurvey.git@${DESISURVEY_VERSION}#egg=desisurvey
             - name: Install desimodel data
               env:
-                  DESIMODEL_DATA: branches/test-0.19
+                  DESIMODEL_DATA: branches/test-0.20
               run: install_desimodel_data --desimodel-version ${DESIMODEL_DATA}
             - name: Print Python package versions
               run: python -m pip freeze
@@ -97,16 +97,16 @@ jobs:
                 python -m pip install "numpy<1.23" "matplotlib<3.7" "astropy<6.1" "specutils<1.15"
             - name: Install DESI packages
               env:
-                  DESIMODEL_VERSION: 0.19.3
+                  DESIMODEL_VERSION: 0.20.0
                   DESISURVEY_VERSION: update-test-matrix
               run: |
                 python -m pip install desiutil
                 python -m pip install --no-build-isolation specsim
-                python -m pip install git+https://github.com/desihub/desimodel.git@${DESIMODEL_VERSION}#egg=desimodel
+                python -m pip install desimodel==${DESIMODEL_VERSION}
                 python -m pip install git+https://github.com/desihub/desisurvey.git@${DESISURVEY_VERSION}#egg=desisurvey
             - name: Install desimodel data
               env:
-                  DESIMODEL_DATA: branches/test-0.19
+                  DESIMODEL_DATA: branches/test-0.20
               run: install_desimodel_data --desimodel-version ${DESIMODEL_DATA}
             - name: Print Python package versions
               run: python -m pip freeze
