@@ -21,7 +21,7 @@ jobs:
                       python-version: '3.13'
                       numpy-version: '<3'
                       matplotlib-version: '<3.11'
-                      astropy-version: '<7'
+                      astropy-version: '<8'
                       specutils-version: '<3'
                     - os: ubuntu-latest
                       python-version: '3.12'
@@ -57,15 +57,16 @@ jobs:
                 python -m pip install "numpy${{ matrix.numpy-version }}" "matplotlib${{ matrix.matplotlib-version }}" "astropy${{ matrix.astropy-version }}" "specutils${{ matrix.specutils-version }}"
             - name: Install DESI packages
               env:
-                  DESIMODEL_VERSION: 0.19.3
-                  DESISURVEY_VERSION: update-test-matrix
+                  DESIMODEL_VERSION: 0.20.0
+                  DESISURVEY_VERSION: main
               run: |
-                python -m pip install desiutil specsim
-                python -m pip install git+https://github.com/desihub/desimodel.git@${DESIMODEL_VERSION}#egg=desimodel
-                python -m pip install git+https://github.com/desihub/desisurvey.git@${DESISURVEY_VERSION}#egg=desisurvey
+                python -m pip install desiutil
+                python -m pip install --no-build-isolation specsim
+                python -m pip install desimodel==${DESIMODEL_VERSION}
+                python -m pip install git+https://github.com/desihub/desisurvey@${DESISURVEY_VERSION}
             - name: Install desimodel data
               env:
-                  DESIMODEL_DATA: branches/test-0.19
+                  DESIMODEL_DATA: branches/test-0.20
               run: install_desimodel_data --desimodel-version ${DESIMODEL_DATA}
             - name: Print Python package versions
               run: python -m pip freeze
@@ -96,15 +97,16 @@ jobs:
                 python -m pip install "numpy<1.23" "matplotlib<3.7" "astropy<6.1" "specutils<1.15"
             - name: Install DESI packages
               env:
-                  DESIMODEL_VERSION: 0.19.3
-                  DESISURVEY_VERSION: update-test-matrix
+                  DESIMODEL_VERSION: 0.20.0
+                  DESISURVEY_VERSION: main
               run: |
-                python -m pip install desiutil specsim
-                python -m pip install git+https://github.com/desihub/desimodel.git@${DESIMODEL_VERSION}#egg=desimodel
-                python -m pip install git+https://github.com/desihub/desisurvey.git@${DESISURVEY_VERSION}#egg=desisurvey
+                python -m pip install desiutil
+                python -m pip install --no-build-isolation specsim
+                python -m pip install desimodel==${DESIMODEL_VERSION}
+                python -m pip install git+https://github.com/desihub/desisurvey@${DESISURVEY_VERSION}
             - name: Install desimodel data
               env:
-                  DESIMODEL_DATA: branches/test-0.19
+                  DESIMODEL_DATA: branches/test-0.20
               run: install_desimodel_data --desimodel-version ${DESIMODEL_DATA}
             - name: Print Python package versions
               run: python -m pip freeze
