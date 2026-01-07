@@ -60,7 +60,8 @@ jobs:
                   DESIMODEL_VERSION: 0.19.3
                   DESISURVEY_VERSION: update-test-matrix
               run: |
-                python -m pip install desiutil specsim
+                python -m pip install desiutil
+                python -m pip install --no-build-isolation specsim
                 python -m pip install git+https://github.com/desihub/desimodel.git@${DESIMODEL_VERSION}#egg=desimodel
                 python -m pip install git+https://github.com/desihub/desisurvey.git@${DESISURVEY_VERSION}#egg=desisurvey
             - name: Install desimodel data
@@ -99,7 +100,8 @@ jobs:
                   DESIMODEL_VERSION: 0.19.3
                   DESISURVEY_VERSION: update-test-matrix
               run: |
-                python -m pip install desiutil specsim
+                python -m pip install desiutil
+                python -m pip install --no-build-isolation specsim
                 python -m pip install git+https://github.com/desihub/desimodel.git@${DESIMODEL_VERSION}#egg=desimodel
                 python -m pip install git+https://github.com/desihub/desisurvey.git@${DESISURVEY_VERSION}#egg=desisurvey
             - name: Install desimodel data
