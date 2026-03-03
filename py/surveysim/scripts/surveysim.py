@@ -144,7 +144,11 @@ def main(args):
 
     # Initialize simulation progress tracking.
     stats = surveysim.stats.SurveyStatistics(args.start, args.stop)
-    explist = surveysim.exposures.ExposureList(existing_exposures=exps)
+    try:
+        max_nexp = config.max_nexp()
+    except AttributeError:
+        max_nexp = 60000
+    explist = surveysim.exposures.ExposureList(max_nexp=max_nexp, existing_exposures=exps)
 
     # Initialize the survey strategy rules.
     if args.rules is None:
