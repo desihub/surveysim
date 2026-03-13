@@ -7,9 +7,13 @@ surveysim change log
 
 * Require `pytest` instead of `python setup.py test` for compatibility
   with desiutil 3.5.0 (PR `#84`_).
+* Update doc configuration (PR `#85`_).
+* Update test matrix for NumPy 2 compatibility (PR `#88`_).
 * Test with astropy/7.x (PR `#89`_).
 
 .. _`#84`: https://github.com/desihub/surveysim/pull/84
+.. _`#85`: https://github.com/desihub/surveysim/pull/85
+.. _`#88`: https://github.com/desihub/surveysim/pull/88
 .. _`#89`: https://github.com/desihub/surveysim/pull/89
 
 0.12.6 (2024-05-01)
