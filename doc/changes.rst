@@ -2,7 +2,12 @@
 surveysim change log
 ====================
 
-0.12.7 (unreleased)
+0.12.8 (unreleased)
+-------------------
+
+* No changes yet.
+
+0.12.7 (2026-03-19)
 -------------------
 
 * Require `pytest` instead of `python setup.py test` for compatibility
